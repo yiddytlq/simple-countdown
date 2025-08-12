@@ -14,6 +14,7 @@
   "scripts": {
     "start": "./variables.sh public && react-scripts start",
     "build": "./variables.sh public && react-scripts build",
+    "lint": "react-scripts lint",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
