@@ -15,7 +15,7 @@ body:
     attributes:
       label: Summary
       description: Provide a brief summary of the feature
-      placeholder: "Add credit to original developer in README"
+      placeholder: "Short summary of the feature"
     validations:
       required: true
 
@@ -24,7 +24,7 @@ body:
     attributes:
       label: Details
       description: Describe the feature in detail and how it should behave
-      placeholder: "Add a credit section at the bottom of README with a link to the original repo..."
+      placeholder: "Detailed description of the feature and expected behavior"
 
   - type: input
     id: related-issues
