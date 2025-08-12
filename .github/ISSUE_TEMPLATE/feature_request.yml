@@ -42,7 +42,7 @@ body:
         - High
         - Medium
         - Low
-      default: Medium
+      default: 1
 
   - type: input
     id: additional-notes
