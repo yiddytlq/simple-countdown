@@ -63,13 +63,13 @@ jobs:
           webhook-type: incoming-webhook
           payload: |
             attachments:
+              text: "${{ steps.status_format.outputs.emoji }} *GitHub Action Notification*"
               - color: "${{ steps.status_format.outputs.color }}"
                 blocks:
                   - type: section
                     text:
                       type: mrkdwn
                       text: |
-                        ${{ steps.status_format.outputs.emoji }} *GitHub Action Notification*
                         *Event:* `${{ github.event_name }}`
                         *Repository:* <https://github.com/${{ github.repository }}|${{ github.repository }}>
                         *Workflow:* `${{ github.workflow }}`
