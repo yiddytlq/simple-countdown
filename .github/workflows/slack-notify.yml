@@ -55,6 +55,37 @@ jobs:
               ;;
           esac
 
+      - name: Format event details
+        id: event_info
+        run: |
+          EVENT="${{ github.event_name }}"
+          case "$EVENT" in
+            push)
+              BRANCH="${{ github.ref_name }}"
+              COMMITS=$(echo "${{ toJson(github.event.commits) }}" | jq -r '.[].message' | sed 's/^/- /')
+              echo "details=Commit(s) pushed to \`$BRANCH\`:\n$COMMITS" >> $GITHUB_OUTPUT
+              ;;
+            pull_request)
+              TITLE="${{ github.event.pull_request.title }}"
+              ACTION="${{ github.event.action }}"
+              BRANCH="${{ github.event.pull_request.head.ref }}"
+              echo "details=Pull Request *$ACTION*: \`$TITLE\` (branch: \`$BRANCH\`)" >> $GITHUB_OUTPUT
+              ;;
+            issues)
+              TITLE="${{ github.event.issue.title }}"
+              ACTION="${{ github.event.action }}"
+              NUMBER="${{ github.event.issue.number }}"
+              echo "details=Issue *$ACTION*: \`#$NUMBER - $TITLE\`" >> $GITHUB_OUTPUT
+              ;;
+            workflow_run)
+              NAME="${{ github.event.workflow.name }}"
+              echo "details=Workflow run triggered by *$NAME*" >> $GITHUB_OUTPUT
+              ;;
+            *)
+              echo "details=$EVENT event triggered" >> $GITHUB_OUTPUT
+              ;;
+          esac
+
       - name: Send Slack Notification
         if: ${{ steps.decision.outputs.should_notify == 'true' }}
         uses: slackapi/slack-github-action@v2.1.1
@@ -70,7 +101,7 @@ jobs:
                     text:
                       type: mrkdwn
                       text: |
-                        *Event:* `${{ github.event_name }}`
+                        *Event:* `${{ steps.event_info.outputs.details }}`
                         *Repository:* <https://github.com/${{ github.repository }}|${{ github.repository }}>
                         *Workflow:* `${{ github.workflow }}`
                         *Status:* `${{ github.event.workflow_run.conclusion || job.status }}`
