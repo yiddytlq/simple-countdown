@@ -37,6 +37,24 @@ jobs:
             echo "should_notify=true" >> $GITHUB_OUTPUT
           fi
 
+      - name: Determine status emoji and color
+        id: status_format
+        run: |
+          case "${{ github.event.workflow_run.conclusion || job.status }}" in
+            success)
+              echo "emoji=:success:" >> $GITHUB_OUTPUT
+              echo "color=#36a64f" >> $GITHUB_OUTPUT
+              ;;
+            failure)
+              echo "emoji=:error:" >> $GITHUB_OUTPUT
+              echo "color=#ff0000" >> $GITHUB_OUTPUT
+              ;;
+            *)
+              echo "emoji=:warn:" >> $GITHUB_OUTPUT
+              echo "color=#ffae42" >> $GITHUB_OUTPUT
+              ;;
+          esac
+
       - name: Send Slack Notification
         if: ${{ steps.decision.outputs.should_notify == 'true' }}
         uses: slackapi/slack-github-action@v2.1.1
@@ -44,15 +62,17 @@ jobs:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
           payload: |
-            text: "*GitHub Action Notification*"
-            blocks:
-              - type: section
-                text:
-                  type: mrkdwn
-                  text: |
-                    *Event:* `${{ github.event_name }}`
-                    *Repository:* <https://github.com/${{ github.repository }}|${{ github.repository }}>
-                    *Workflow:* `${{ github.workflow }}`
-                    *Status:* `${{ github.event.workflow_run.conclusion || job.status }}`
-                    *Actor:* <https://github.com/${{ github.actor }}|${{ github.actor }}>
-                    *URL:* <${{ github.event.pull_request.html_url || github.event.head_commit.url }}|View Details>
+            attachments:
+              - color: "${{ steps.status_format.outputs.color }}"
+                blocks:
+                  - type: section
+                    text:
+                      type: mrkdwn
+                      text: |
+                        ${{ steps.status_format.outputs.emoji }} *GitHub Action Notification*
+                        *Event:* `${{ github.event_name }}`
+                        *Repository:* <https://github.com/${{ github.repository }}|${{ github.repository }}>
+                        *Workflow:* `${{ github.workflow }}`
+                        *Status:* `${{ github.event.workflow_run.conclusion || job.status }}`
+                        *Actor:* <https://github.com/${{ github.actor }}|${{ github.actor }}>
+                        *URL:* <${{ github.event.pull_request.html_url || github.event.head_commit.url }}|View Details>
