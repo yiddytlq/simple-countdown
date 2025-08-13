@@ -1,13 +1,10 @@
 name: Docker Build & Publish
 
 on:
-  push:
-    branches:
-      - master
-      - main
+  workflow_dispatch:
 
 jobs:
-  docker:
+  docker-build-and-publishsh:
     runs-on: ubuntu-latest
     environment: docker-publish
 

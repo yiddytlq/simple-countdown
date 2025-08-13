@@ -10,7 +10,8 @@ on:
   workflow_run:
     workflows:
       - Docker Build & Publish
-      - CI - Lint & CodeQL Scan
+      - Lint & Build Checks
+      - CI - CodeQL Scan
     types: [completed]
   issues:
     types: [opened, edited, closed, reopened]
@@ -21,7 +22,25 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
-      - uses: 8398a7/action-slack@v3
+      - name: Determine if workflow should notify
+        id: check
+        run: |
+          echo "WORKFLOW_NAME=${{ github.event.workflow_run.name }}" >> $GITHUB_ENV
+          echo "CONCLUSION=${{ github.event.workflow_run.conclusion }}" >> $GITHUB_ENV
+          # Set a flag for Slack notification
+          if [[ "${{ github.event.workflow_run.name }}" == "Docker Build & Publish" ]]; then
+            echo "SHOULD_NOTIFY=true" >> $GITHUB_ENV
+          elif [[ "${{ github.event.workflow_run.name }}" == "Lint & Build Checks" && "${{ github.event.workflow_run.conclusion }}" != "success" ]]; then
+            echo "SHOULD_NOTIFY=true" >> $GITHUB_ENV
+          elif [[ "${{ github.event.workflow_run.name }}" == "CI - CodeQL Scan" && "${{ github.event.workflow_run.conclusion }}" != "success" ]]; then
+            echo "SHOULD_NOTIFY=true" >> $GITHUB_ENV
+          else
+            echo "SHOULD_NOTIFY=false" >> $GITHUB_ENV
+          fi
+
+      - name: Send Slack Notification
+        if: env.SHOULD_NOTIFY == 'true'
+        uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
           fields: repo,commit,author,ref,workflow,job,took,eventName

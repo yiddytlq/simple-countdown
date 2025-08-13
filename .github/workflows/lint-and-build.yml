@@ -1,0 +1,59 @@
+name: Lint & Build Checks
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  partial-lint:
+    name: Partial Lint (Changed Files)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Install dependencies
+        run: npm install
+      - name: Get changed JS/TS files
+        id: changed_files
+        run: |
+          echo "::set-output name=files::$(git diff --name-only ${{ github.sha }}~1 ${{ github.sha }} | grep -E '\.(js|ts|tsx)$' || true)"
+      - name: Run ESLint on changed files
+        if: steps.changed_files.outputs.files != ''
+        run: npx eslint ${{ steps.changed_files.outputs.files }}
+      - name: Upload partial lint results
+        uses: actions/upload-artifact@v3
+        with:
+          name: partial-lint-results
+          path: eslint-report.txt
+
+  full-lint-build:
+    name: Full Lint & Build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Install dependencies
+        run: npm install
+      - name: Run Full ESLint
+        run: npm run lint
+      - name: Build project
+        run: npm run build
+      - name: Upload full lint/build results
+        uses: actions/upload-artifact@v3
+        with:
+          name: full-lint-build-results
+          path: eslint-report.txt
