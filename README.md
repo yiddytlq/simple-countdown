@@ -6,21 +6,17 @@
 
 Easy countdown is an easy to setup countdown page. Can be setup as a countdown or as a timer
 
-## Credits
-
-This project is based on the original [easy-countdown](https://github.com/Yooooomi/easy-countdown) by Yooooomi.
-
 # Setup
 
 ## Using docker (Recommended)
 
 If you use docker, just edit the `docker-compose.yml` file so that it fits your needs
 
-|Variables|Definition|Example|
-|-|-|-|
-|TIMER_BACKGROUND|The url of an image that will be used for as background|https://wallpaperplay.com/walls/full/0/7/6/29912.jpg|
-|TIMER_TARGET|The target date of the countdown, if date is in the future, timer will decrease, otherwise it will increase|Fri Oct 01 2021 15:33:36 GMT+0200|
-|TIMER_TITLE|The title of the countdown, can be empty|My title!|
+| Variables        | Definition                                                                                                  | Example                                              |
+| ---------------- | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| TIMER_BACKGROUND | The url of an image that will be used for as background                                                     | https://wallpaperplay.com/walls/full/0/7/6/29912.jpg |
+| TIMER_TARGET     | The target date of the countdown, if date is in the future, timer will decrease, otherwise it will increase | Fri Oct 01 2021 15:33:36 GMT+0200                    |
+| TIMER_TITLE      | The title of the countdown, can be empty                                                                    | My title!                                            |
 
 ### Example of `docker-compose.yml` file
 
@@ -45,7 +41,7 @@ services:
 
 > This method builds the project following the env variables you gave, producing a `build` folder that has to be served manually afterwards. You can use [`serve`](https://www.npmjs.com/package/serve) to achieve it
 
-Use `yarn` to use the build script from the 
+Use `yarn` to use the build script from the
 `package.json`. Simply use `yarn build`. Use the variables above in the env to personalize your countdown
 
 - `npm install`
@@ -54,3 +50,7 @@ Use `yarn` to use the build script from the
 > Variables will be taken from env, and are the same as above
 
 I.E: `TIMER_TARGET="Fri Oct 01 2021 15:33:36 GMT+0200" yarn build && serve -s -l tcp://0.0.0.0:3000 build/`
+
+## Credits
+
+This project is based on the original [easy-countdown](https://github.com/Yooooomi/easy-countdown) by Yooooomi.
