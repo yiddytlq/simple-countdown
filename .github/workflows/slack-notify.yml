@@ -23,28 +23,36 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Determine if workflow should notify
-        id: check
+        id: decision
         run: |
-          echo "WORKFLOW_NAME=${{ github.event.workflow_run.name }}" >> $GITHUB_ENV
-          echo "CONCLUSION=${{ github.event.workflow_run.conclusion }}" >> $GITHUB_ENV
-          # Set a flag for Slack notification
-          if [[ "${{ github.event.workflow_run.name }}" == "Docker Build & Publish" ]]; then
-            echo "SHOULD_NOTIFY=true" >> $GITHUB_ENV
-          elif [[ "${{ github.event.workflow_run.name }}" == "Lint & Build Checks" && "${{ github.event.workflow_run.conclusion }}" != "success" ]]; then
-            echo "SHOULD_NOTIFY=true" >> $GITHUB_ENV
-          elif [[ "${{ github.event.workflow_run.name }}" == "CI - CodeQL Scan" && "${{ github.event.workflow_run.conclusion }}" != "success" ]]; then
-            echo "SHOULD_NOTIFY=true" >> $GITHUB_ENV
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            if [[ "${{ github.event.workflow_run.name }}" == "CI - CodeQL Scan" && "${{ github.event.workflow_run.conclusion }}" == "success" ]]; then
+              echo "should_notify=false" >> $GITHUB_OUTPUT
+            elif [[ "${{ github.event.workflow_run.name }}" == "Lint & Build Checks" && "${{ github.event.workflow_run.conclusion }}" == "success" ]]; then
+              echo "should_notify=false" >> $GITHUB_OUTPUT
+            else
+              echo "should_notify=true" >> $GITHUB_OUTPUT
+            fi
           else
-            echo "SHOULD_NOTIFY=false" >> $GITHUB_ENV
+            echo "should_notify=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Send Slack Notification
-        if: env.SHOULD_NOTIFY == 'true'
-        uses: 8398a7/action-slack@v3
+        if: ${{ steps.decision.outputs.should_notify == 'true' }}
+        uses: slackapi/slack-github-action@v2.1.1
         with:
-          status: ${{ job.status }}
-          fields: repo,commit,author,ref,workflow,job,took,eventName
-          mention: "" # set to 'here' or '@channel' if you want mentions
-          # custom_payload: '{"text":"A GitHub event occurred."}' # optional custom message
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "*GitHub Action Notification*"
+            blocks:
+              - type: section
+                text:
+                  type: mrkdwn
+                  text: |
+                    *Event:* `${{ github.event_name }}`
+                    *Repository:* <https://github.com/${{ github.repository }}|${{ github.repository }}>
+                    *Workflow:* `${{ github.workflow }}`
+                    *Status:* `${{ github.event.workflow_run.conclusion || job.status }}`
+                    *Actor:* <https://github.com/${{ github.actor }}|${{ github.actor }}>
+                    *URL:* <${{ github.event.pull_request.html_url || github.event.head_commit.url }}|View Details>
