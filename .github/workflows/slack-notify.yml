@@ -40,7 +40,8 @@ jobs:
       - name: Determine status emoji and color
         id: status_format
         run: |
-          case "${{ github.event.workflow_run.conclusion || job.status }}" in
+          STATUS="${{ github.event.workflow_run.conclusion || job.status }}"
+          case "$STATUS" in
             success)
               echo "emoji=:success:" >> $GITHUB_OUTPUT
               echo "color=#36a64f" >> $GITHUB_OUTPUT
@@ -59,45 +60,35 @@ jobs:
         id: event_info
         run: |
           EVENT="${{ github.event_name }}"
+          DETAILS=""
           case "$EVENT" in
             push)
               BRANCH="${{ github.ref_name }}"
               COMMITS=$(echo '${{ toJson(github.event.commits) }}' | jq -r '.[].message' | sed 's/^/- /')
-              {
-                echo "details<<EOF"
-                echo "Commit(s) pushed to \`$BRANCH\`:"
-                echo "$COMMITS"
-                echo "EOF"
-              } >> "$GITHUB_OUTPUT"
+              COMMITS=$(echo "$COMMITS" | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
+              DETAILS="Commit(s) pushed to \`$BRANCH\`:\n$COMMITS"
               ;;
             pull_request)
               TITLE="${{ github.event.pull_request.title }}"
               ACTION="${{ github.event.action }}"
               BRANCH="${{ github.event.pull_request.head.ref }}"
-              {
-                echo "details<<EOF"
-                echo "Pull Request *$ACTION*: \`$TITLE\` (branch: \`$BRANCH\`)"
-                echo "EOF"
-              } >> "$GITHUB_OUTPUT"
+              DETAILS="Pull Request *$ACTION*: \`$TITLE\` (branch: \`$BRANCH\`)"
               ;;
             issues)
               TITLE="${{ github.event.issue.title }}"
               ACTION="${{ github.event.action }}"
               NUMBER="${{ github.event.issue.number }}"
-              {
-                echo "details<<EOF"
-                echo "Issue *$ACTION*: \`#$NUMBER - $TITLE\`"
-                echo "EOF"
-              } >> "$GITHUB_OUTPUT"
+              DETAILS="Issue *$ACTION*: \`#$NUMBER - $TITLE\`"
               ;;
             workflow_run)
               NAME="${{ github.event.workflow.name }}"
-              echo "details=Workflow run triggered by *$NAME*" >> "$GITHUB_OUTPUT"
+              DETAILS="Workflow run triggered by *$NAME*"
               ;;
             *)
-              echo "details=$EVENT event triggered" >> "$GITHUB_OUTPUT"
+              DETAILS="$EVENT event triggered"
               ;;
           esac
+          echo "details=$DETAILS" >> $GITHUB_OUTPUT
 
       - name: Send Slack Notification
         if: ${{ steps.decision.outputs.should_notify == 'true' }}
@@ -114,10 +105,9 @@ jobs:
                     text:
                       type: mrkdwn
                       text: |
-                        *Event:* `${{ steps.event_info.outputs.details }}`
+                        *Event Details:* ${{ steps.event_info.outputs.details }}
                         *Repository:* <https://github.com/${{ github.repository }}|${{ github.repository }}>
                         *Workflow:* `${{ github.workflow }}`
                         *Status:* `${{ github.event.workflow_run.conclusion || job.status }}`
                         *Actor:* <https://github.com/${{ github.actor }}|${{ github.actor }}>
-                        *Details:* ${{ steps.event_info.outputs.details }}
-                        *URL:* <${{ github.event.pull_request.html_url || github.event.head_commit.url }}|View Details>
+                        *URL:* <${{ github.event.pull_request.html_url || github.event.head_commit.url || github.event.workflow_run.html_url }}|View Details>
