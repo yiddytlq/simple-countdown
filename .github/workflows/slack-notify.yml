@@ -62,27 +62,40 @@ jobs:
           case "$EVENT" in
             push)
               BRANCH="${{ github.ref_name }}"
-              COMMITS=$(echo "${{ toJson(github.event.commits) }}" | jq -r '.[].message' | sed 's/^/- /')
-              echo "details=Commit(s) pushed to \`$BRANCH\`:\n$COMMITS" >> $GITHUB_OUTPUT
+              COMMITS=$(echo '${{ toJson(github.event.commits) }}' | jq -r '.[].message' | sed 's/^/- /')
+              {
+                echo "details<<EOF"
+                echo "Commit(s) pushed to \`$BRANCH\`:"
+                echo "$COMMITS"
+                echo "EOF"
+              } >> "$GITHUB_OUTPUT"
               ;;
             pull_request)
               TITLE="${{ github.event.pull_request.title }}"
               ACTION="${{ github.event.action }}"
               BRANCH="${{ github.event.pull_request.head.ref }}"
-              echo "details=Pull Request *$ACTION*: \`$TITLE\` (branch: \`$BRANCH\`)" >> $GITHUB_OUTPUT
+              {
+                echo "details<<EOF"
+                echo "Pull Request *$ACTION*: \`$TITLE\` (branch: \`$BRANCH\`)"
+                echo "EOF"
+              } >> "$GITHUB_OUTPUT"
               ;;
             issues)
               TITLE="${{ github.event.issue.title }}"
               ACTION="${{ github.event.action }}"
               NUMBER="${{ github.event.issue.number }}"
-              echo "details=Issue *$ACTION*: \`#$NUMBER - $TITLE\`" >> $GITHUB_OUTPUT
+              {
+                echo "details<<EOF"
+                echo "Issue *$ACTION*: \`#$NUMBER - $TITLE\`"
+                echo "EOF"
+              } >> "$GITHUB_OUTPUT"
               ;;
             workflow_run)
               NAME="${{ github.event.workflow.name }}"
-              echo "details=Workflow run triggered by *$NAME*" >> $GITHUB_OUTPUT
+              echo "details=Workflow run triggered by *$NAME*" >> "$GITHUB_OUTPUT"
               ;;
             *)
-              echo "details=$EVENT event triggered" >> $GITHUB_OUTPUT
+              echo "details=$EVENT event triggered" >> "$GITHUB_OUTPUT"
               ;;
           esac
 
@@ -106,4 +119,5 @@ jobs:
                         *Workflow:* `${{ github.workflow }}`
                         *Status:* `${{ github.event.workflow_run.conclusion || job.status }}`
                         *Actor:* <https://github.com/${{ github.actor }}|${{ github.actor }}>
+                        *Details:* ${{ steps.event_info.outputs.details }}
                         *URL:* <${{ github.event.pull_request.html_url || github.event.head_commit.url }}|View Details>
