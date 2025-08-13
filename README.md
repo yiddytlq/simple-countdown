@@ -6,6 +6,10 @@
 
 Easy countdown is an easy to setup countdown page. Can be setup as a countdown or as a timer
 
+## Credits
+
+This project is based on the original [easy-countdown](https://github.com/Yooooomi/easy-countdown) by Yooooomi.
+
 # Setup
 
 ## Using docker (Recommended)
