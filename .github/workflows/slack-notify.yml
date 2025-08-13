@@ -56,7 +56,7 @@ jobs:
               ;;
           esac
 
-      - name: Format event details
+      - name: Format event details as one line
         id: event_info
         run: |
           EVENT="${{ github.event_name }}"
@@ -64,9 +64,9 @@ jobs:
           case "$EVENT" in
             push)
               BRANCH="${{ github.ref_name }}"
-              COMMITS=$(echo '${{ toJson(github.event.commits) }}' | jq -r '.[].message' | sed 's/^/- /')
-              COMMITS=$(echo "$COMMITS" | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
-              DETAILS="Commit(s) pushed to \`$BRANCH\`:\n$COMMITS"
+              COMMITS=$(echo '${{ toJson(github.event.commits) }}' | jq -r '.[].message')
+              COMMITS=$(echo "$COMMITS" | tr '\n' ' | ' | sed 's/| $//; s/"/\\"/g')
+              DETAILS="Commits pushed to \`$BRANCH\`: $COMMITS"
               ;;
             pull_request)
               TITLE="${{ github.event.pull_request.title }}"
