@@ -62,8 +62,8 @@ jobs:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
           payload: |
+            text: "${{ steps.status_format.outputs.emoji }} *GitHub Action Notification*"
             attachments:
-              text: "${{ steps.status_format.outputs.emoji }} *GitHub Action Notification*"
               - color: "${{ steps.status_format.outputs.color }}"
                 blocks:
                   - type: section
