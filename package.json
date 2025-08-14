@@ -14,6 +14,8 @@
   "scripts": {
     "start": "./variables.sh public && react-scripts start",
     "build": "./variables.sh public && react-scripts build",
+    "win-start": "bash ./variables.sh public && react-scripts start",
+    "win-build": "bash ./variables.sh public && react-scripts build",
     "lint": "eslint src/**/*.{js,jsx,ts,tsx}",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
