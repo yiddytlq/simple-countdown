@@ -11,7 +11,17 @@ const numbers = [
 ];
 
 export function describe(a, b) {
-  let ms = Math.abs(b.getTime() - a.getTime());
+  let ms = b.getTime() - a.getTime();
+  
+  // If the target date is in the past, return negative values
+  if (ms < 0) {
+    const result = {};
+    for (let i = 0; i < numbers.length; i += 1) {
+      result[numbers[i].label] = -1;
+    }
+    return result;
+  }
+  
   const result = {};
 
   for (let i = 0; i < numbers.length; i += 1) {
