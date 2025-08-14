@@ -31,7 +31,7 @@ jobs:
         if: steps.changed_files.outputs.files != ''
         run: npx eslint ${{ steps.changed_files.outputs.files }}
       - name: Upload partial lint results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: partial-lint-results
           path: eslint-report.txt
@@ -53,7 +53,7 @@ jobs:
       - name: Build project
         run: npm run build
       - name: Upload full lint/build results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: full-lint-build-results
           path: eslint-report.txt
