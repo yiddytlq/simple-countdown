@@ -6,7 +6,7 @@ on:
       - master
       - main
   pull_request:
-    types: [opened, synchronize, reopened, closed]
+    types: [reopened, closed]
   workflow_run:
     workflows:
       - Docker Build & Publish
@@ -25,7 +25,10 @@ jobs:
       - name: Determine if workflow should notify
         id: decision
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+          if [[ "${{ github.actor }}" == "yiddytlq" ]]; then
+            echo "should_notify=false" >> $GITHUB_OUTPUT
+            exit 0
+          elif [[ "${{ github.event_name }}" == "workflow_run" ]]; then
             if [[ "${{ github.event.workflow_run.name }}" == "CI - CodeQL Scan" && "${{ github.event.workflow_run.conclusion }}" == "success" ]]; then
               echo "should_notify=false" >> $GITHUB_OUTPUT
             elif [[ "${{ github.event.workflow_run.name }}" == "Lint & Build Checks" && "${{ github.event.workflow_run.conclusion }}" == "success" ]]; then
