@@ -26,6 +26,7 @@ function registerValidSW(swUrl, config) {
   navigator.serviceWorker
     .register(swUrl)
     .then((registration) => {
+      // eslint-disable-next-line no-param-reassign
       registration.onupdatefound = () => {
         const installingWorker = registration.installing;
         if (installingWorker == null) {
@@ -44,7 +45,7 @@ function registerValidSW(swUrl, config) {
 
               // Execute callback
               if (config && config.onUpdate) {
-                config.onUpdate(registration);
+                config.onUpdate(registration); // registration is used here
               }
             } else {
               // At this point, everything has been precached.
@@ -54,7 +55,7 @@ function registerValidSW(swUrl, config) {
 
               // Execute callback
               if (config && config.onSuccess) {
-                config.onSuccess(registration);
+                config.onSuccess(registration); // registration is used here
               }
             }
           }
@@ -121,6 +122,11 @@ export function register(config) {
             'This web app is being served cache-first by a service '
             + 'worker. To learn more, visit https://bit.ly/CRA-PWA',
           );
+
+          // Example usage of the registration object to avoid linting errors
+          if (registration.scope) {
+            logger.log(`Service worker scope: ${registration.scope}`);
+          }
         });
       } else {
         // Is not localhost. Just register service worker

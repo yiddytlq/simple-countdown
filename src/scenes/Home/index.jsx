@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import s from './index.module.css';
-import { describe } from '../../service/date';
+import describe from '../../service/date';
 import Block from './Block';
 
 const end = window.target;
