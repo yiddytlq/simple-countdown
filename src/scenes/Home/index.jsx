@@ -3,7 +3,7 @@ import s from './index.module.css';
 import { describe } from '../../service/date';
 import Block from './Block';
 
-let end = window.target;
+const end = window.target;
 
 function Home() {
   const [date, setDate] = useState(new Date());
