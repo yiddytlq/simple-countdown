@@ -14,9 +14,7 @@ function Home() {
     return () => clearInterval(inter);
   }, []);
 
-  const described = useMemo(() => {
-    return describe(date, end);
-  }, [date]);
+  const described = useMemo(() => describe(date, end), [date]);
 
   return (
     <div className={s.root} style={{ backgroundImage: `url('${window.background}')` }}>
