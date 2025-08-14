@@ -8,7 +8,9 @@ function Block({ className, value, title }) {
   return (
     <div className={cl(s.root, className)}>
       <div className={s.numbers}>
-        {value.split('').map((v) => <NumberDisplay value={+v} key={v} />)}
+        {value.split('').map((v) => (
+          <NumberDisplay value={+v} key={v} />
+        ))}
       </div>
       <div className={s.title}>{title}</div>
     </div>
