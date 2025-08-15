@@ -19,6 +19,12 @@ on:
         options:
           - full
           - partial
+      branch:
+        description: 'Branch to run on'
+        required: true
+        default: 'main'
+        type: string
+
 
 jobs:
   partial-lint:
@@ -27,6 +33,8 @@ jobs:
     if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_type == 'partial')
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.branch }}
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -52,6 +60,8 @@ jobs:
     if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_type == 'full')
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.branch }}
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
