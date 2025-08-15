@@ -1,0 +1,37 @@
+name: Build and Run check
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to run the check on'
+        required: true
+        default: 'main'
+
+jobs:
+  run-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
+
+      - name: Start app in background
+        run: nohup npm start &
+
+      - name: Wait for app to start
+        run: npx wait-on http://localhost:3000
+
+      - name: Verify app is running
+        run: curl -I http://localhost:3000
