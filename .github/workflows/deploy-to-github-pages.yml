@@ -29,6 +29,7 @@ jobs:
           TIMER_BACKGROUND: ${{ secrets.TIMER_BACKGROUND }}
           TIMER_TARGET: ${{ secrets.TIMER_TARGET }}
           TIMER_TITLE: ${{ secrets.TIMER_TITLE }}
+          PUBLIC_URL: https://yiddytlq.github.io/simple-countdown
         run: |
           ./variables.sh public
           npm run build
