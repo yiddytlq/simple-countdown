@@ -24,5 +24,21 @@
         "@typescript-eslint"
     ],
     "rules": {
+        "react/jsx-filename-extension": "off",
+        "react/prop-types": "off",
+        "react/no-array-index-key": "off",
+        "no-console": "off",
+        "prefer-const": "off",
+        "quotes": "off",
+        "semi": "off",
+        "arrow-body-style": "off",
+        "no-unused-vars": "off",
+        "import/prefer-default-export": "off",
+        "prefer-destructuring": "off",
+        "operator-linebreak": "off",
+        "comma-dangle": "off",
+        "no-use-before-define": "off",
+        "arrow-parens": "off",
+        "no-param-reassign": "off"
     }
 }
