@@ -7,7 +7,7 @@ function Block({ className, value, title }) {
   return (
     <div className={cl(s.root, className)}>
       <div className={s.numbers}>
-        {value.split('').map((v, k) => <NumberDisplay value={+v} key={`digit-${k}`} />)}
+        {value.split('').map((v, k) => <NumberDisplay value={+v} key={k} />)}
       </div>
       <div className={s.title}>{title}</div>
     </div>
