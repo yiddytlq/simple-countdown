@@ -11,6 +11,16 @@ const numbers = [
 ];
 
 export function describe(a, b) {
+  // Handle invalid dates gracefully
+  if (!a || !b || isNaN(a.getTime()) || isNaN(b.getTime())) {
+    return {
+      day: 0,
+      hour: 0,
+      minute: 0,
+      second: 0,
+    };
+  }
+
   let ms = Math.abs(b.getTime() - a.getTime());
   const result = {};
 

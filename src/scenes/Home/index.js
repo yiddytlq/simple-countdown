@@ -23,14 +23,18 @@ function Home() {
       <div>
         {(window.title && window.title.length > 0) && <div className={s.title}>{window.title}</div>}
         <div className={s.blocks}>
-          {Object.entries(described).map(([key, value], idx, arr) => (
-            <Block
-              className={s.block}
-              key={key}
-              title={`${key}${value > 1 ? 's' : ''}`}
-              value={value.toString().padStart(2, '0')}
-            />
-          ))}
+          {Object.entries(described).map(([key, value]) => {
+            // Ensure value is a valid number, default to 0 if not
+            const safeValue = typeof value === 'number' && !isNaN(value) ? value : 0;
+            return (
+              <Block
+                className={s.block}
+                key={key}
+                title={`${key}${safeValue > 1 ? 's' : ''}`}
+                value={safeValue.toString().padStart(2, '0')}
+              />
+            );
+          })}
         </div>
       </div>
     </div>
