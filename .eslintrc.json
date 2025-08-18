@@ -45,7 +45,7 @@
         // resolved "no-unused-vars": "off",
         // resolved "prefer-const": "off",
         // resolved "quotes": "off",
-        "react/prop-types": "off"
+        // resolved "react/prop-types": "off",
         // resolved "react/no-array-index-key": "off"
     },
     "settings": {
