@@ -10,7 +10,7 @@ const numbers = [
   { nb: second, label: 'second' },
 ];
 
-export function describe(a, b) {
+export default function describe(a, b) {
   let ms = Math.abs(b.getTime() - a.getTime());
   const result = {};
 
