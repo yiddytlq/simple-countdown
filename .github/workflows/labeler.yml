@@ -1,16 +1,93 @@
 name: Labeler
 
 on:
+  # Trigger labeler based on file paths & changes of status
   issues:
-    types: [opened, edited]
+    types: [opened, edited, labeled]
   pull_request:
     types: [opened, synchronize, reopened, edited]
+  # Track PR review submissions
+  pull_request_review:
+    types: [submitted]
+  # Track PR merge or close
+  pull_request_target:
+    types: [closed]
 
 jobs:
-  label:
+  # File-based labeler
+  file-labeler:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/labeler@v4
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          configuration-path: .github/labeler.yml # points to your config
+          configuration-path: .github/labeler.yml
+
+  # Dynamic status updater
+  status-tracker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // Determine if the event is a PR review or PR closed
+            let issueNumber;
+            let eventType = context.eventName;
+
+            const statusLabels = ["status:in-review", "status:changes-needed", "status:ready-to-merge", "status:done", "status:approval-needed", "status:info-needed"];
+            const labelsToAdd = [];
+            const labelsToRemove = [];
+
+            if (eventType === "pull_request_review") {
+              issueNumber = context.payload.pull_request.number;
+              const state = context.payload.review.state; // approved, changes_requested, commented
+
+              // Decide which status to add
+              if (state === "approved") {
+                labelsToAdd.push("status:ready-to-merge");
+                labelsToRemove.push("status:in-review", "status:changes-needed", "status:approval-needed");
+              }
+              if (state === "changes_requested") {
+                labelsToAdd.push("status:changes-needed");
+                labelsToRemove.push("status:in-review", "status:ready-to-merge");
+              }
+              if (state === "commented") {
+                labelsToAdd.push("status:info-needed");
+              }
+            }
+
+            if (eventType === "pull_request_target") {
+              issueNumber = context.payload.pull_request.number;
+              if (context.payload.pull_request.merged) {
+                labelsToAdd.push("status:done");
+                labelsToRemove.push(...statusLabels.filter(l => l !== "status:done"));
+              }
+            }
+
+            if (eventType === "issues" && context.payload.action === "labeled") {
+              // Optionally handle manual label updates if needed
+              return;
+            }
+
+            if (issueNumber) {
+              // Remove old status labels
+              for (const label of labelsToRemove) {
+                await github.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  name: label
+                }).catch(() => {});
+              }
+
+              // Add new status labels
+              if (labelsToAdd.length > 0) {
+                await github.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  labels: labelsToAdd
+                });
+              }
+            }
