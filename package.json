@@ -15,8 +15,8 @@
   "scripts": {
     "start": "./variables.sh public && react-scripts start",
     "build": "./variables.sh public && react-scripts build",
-    "win-build": "bash ./variables.sh public && react-scripts build",
     "win-start": "bash ./variables.sh public && react-scripts start",
+    "win-build": "bash ./variables.sh public && react-scripts build",
     "lint": "eslint src/**/*.{js,jsx,ts,tsx}",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -37,11 +37,22 @@
     ]
   },
   "devDependencies": {
+    "@babel/core": "^7.28.3",
+    "@babel/eslint-parser": "^7.28.0",
+    "@babel/plugin-proposal-class-properties": "^7.18.6",
+    "@babel/plugin-transform-runtime": "^7.28.3",
+    "@babel/preset-env": "^7.28.3",
+    "@babel/preset-react": "^7.27.1",
+    "@babel/preset-typescript": "^7.27.1",
+    "@babel/runtime": "^7.28.3",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
     "eslint": "^8.2.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-plugin-import": "^2.25.3",
     "eslint-plugin-jsx-a11y": "^6.5.1",
     "eslint-plugin-react": "^7.28.0",
-    "eslint-plugin-react-hooks": "^4.3.0"
+    "eslint-plugin-react-hooks": "^4.3.0",
+    "typescript": "^4.9.5"
   }
 }

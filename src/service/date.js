@@ -16,7 +16,8 @@ export default function describe(a, b) {
 
   for (let i = 0; i < numbers.length; i += 1) {
     const field = numbers[i].label;
-    const { nb } = numbers[i];
+    // eslint-disable-next-line prefer-destructuring
+    const nb = numbers[i].nb; // Keeping explicit property access to maintain correct digit display
 
     result[field] = Math.floor(ms / nb);
     ms -= result[field] * nb;
