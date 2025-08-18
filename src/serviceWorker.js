@@ -45,7 +45,7 @@ function registerValidSW(swUrl, config) {
 
               // Execute callback
               if (config && config.onUpdate) {
-                config.onUpdate(registration); // registration is used here
+                config.onUpdate(registration);
               }
             } else {
               // At this point, everything has been precached.
