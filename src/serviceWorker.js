@@ -55,7 +55,7 @@ function registerValidSW(swUrl, config) {
 
               // Execute callback
               if (config && config.onSuccess) {
-                config.onSuccess(registration); // registration is used here
+                config.onSuccess(registration);
               }
             }
           }
