@@ -126,7 +126,11 @@ export function register(config) {
           // Example usage of the registration object to avoid linting errors
           if (registration.scope) {
             logger.log(`Service worker scope: ${registration.scope}`);
-          }
+        navigator.serviceWorker.ready.then(() => {
+          logger.log(
+            'This web app is being served cache-first by a service '
+            + 'worker. To learn more, visit https://bit.ly/CRA-PWA',
+          );
         });
       } else {
         // Is not localhost. Just register service worker
