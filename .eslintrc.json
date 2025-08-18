@@ -1,17 +1,21 @@
 {
     "env": {
         "browser": true,
-        "es6": true
+        "es6": true,
+        "jest": true
     },
     "extends": [
+        "eslint:recommended",
         "plugin:react/recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:react-hooks/recommended",
         "airbnb"
     ],
     "globals": {
         "Atomics": "readonly",
         "SharedArrayBuffer": "readonly"
     },
-    "parser": "@typescript-eslint/parser",
+    "parser": "@babel/eslint-parser",
     "parserOptions": {
         "ecmaFeatures": {
             "jsx": true
@@ -21,26 +25,38 @@
     },
     "plugins": [
         "react",
+        "react-hooks",
         "@typescript-eslint"
     ],
     "rules": {
-        "no-console": "off",
-        "linefeed": "off",
-        "linebreak-style": "off",
-        "operator-linebreak": "off",
-        "arrow-parens": "off",
-        "comma-dangle": "off",
-        "no-use-before-define": "off",
-        "import/prefer-default-export": "off",
-        "prefer-destructuring": "off",
-        "no-param-reassign": "off",
-        "semi": "off",
-        "arrow-body-style": "off",
-        "react/jsx-filename-extension": "off",
-        "no-unused-vars": "off",
-        "prefer-const": "off",
-        "quotes": "off",
-        "react/prop-types": "off",
-        "react/no-array-index-key": "off"
+        // resolved "no-console": "off",
+        // resolved "linefeed": "off",
+        // resolved "linebreak-style": "off",
+        // resolved "operator-linebreak": "off",
+        // resolved "arrow-parens": "off",
+        // resolved "comma-dangle": "off",
+        // resolved "no-use-before-define": "off",
+        // resolved "import/prefer-default-export": "off",
+        // resolved "prefer-destructuring": "off",
+        // resolved "no-param-reassign": "off",
+        // resolved "semi": "off",
+        // resolved "arrow-body-style": "off",
+        // resolved "react/jsx-filename-extension": "off",
+        // resolved "no-unused-vars": "off",
+        // resolved "prefer-const": "off",
+        // resolved "quotes": "off",
+        // resolved "react/prop-types": "off",
+        // resolved "react/no-array-index-key": "off"
+    },
+    "settings": {
+        "react": {
+            "version": "detect"
+        },
+        "import/resolver": {
+            "node": {
+                "extensions": [".js", ".jsx", ".ts", ".tsx"]
+            }
+        }
     }
+    
 }
