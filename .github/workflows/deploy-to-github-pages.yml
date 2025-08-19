@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: "Branch to deploy from"
+        description: 'Branch to deploy from'
         required: true
-        default: "main"
+        default: 'main'
 
 permissions:
   contents: read

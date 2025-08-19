@@ -12,24 +12,29 @@ on:
   workflow_dispatch:
     inputs:
       job_type:
-        description: "Which lint/build job to run"
+        description: 'Which lint/build job to run'
         required: true
-        default: "full"
+        default: 'full'
         type: choice
         options:
           - full
           - partial
       branch:
-        description: "Branch to run on"
+        description: 'Branch to run on'
         required: true
-        default: "main"
+        default: 'main'
         type: string
 
 jobs:
+  pre-check:
+    uses: ./.github/workflows/skip-copilot.yml
+
   partial-lint:
     name: Partial Lint (Changed Files)
+    needs: pre-check
+    if: needs.pre-check.outputs.skip != 'true' &&
+        (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_type == 'partial'))
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_type == 'partial')
     steps:
       - uses: actions/checkout@v3
         with:
@@ -55,8 +60,10 @@ jobs:
 
   full-lint-build:
     name: Full Lint & Build
+    needs: pre-check
+    if: needs.pre-check.outputs.skip != 'true' &&
+        (github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_type == 'full'))
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_type == 'full')
     steps:
       - uses: actions/checkout@v3
         with:

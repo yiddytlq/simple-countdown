@@ -6,7 +6,12 @@ on:
   pull_request:
 
 jobs:
+  pre-check:
+    uses: ./.github/workflows/skip-copilot.yml
+
   codeql:
+    needs: pre-check
+    if: needs.pre-check.outputs.skip != 'true'
     runs-on: ubuntu-latest
     permissions:
       actions: read
