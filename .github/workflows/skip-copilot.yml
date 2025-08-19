@@ -1,0 +1,35 @@
+name: Skip Copilot Draft
+
+on:
+  workflow_call:
+    outputs:
+      skip:
+        description: 'Whether to skip this workflow'
+        value: ${{ jobs.check.outputs.skip }}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      skip: ${{ steps.check.outputs.skip }}
+    steps:
+      - name: Determine if workflow should be skipped
+        id: check
+        run: |
+          skip=false
+
+          # Check push events
+          if [ "${GITHUB_EVENT_NAME}" = "push" ]; then
+            head_commit_message="$(jq -r .head_commit.message < $GITHUB_EVENT_PATH)"
+            if [[ "$head_commit_message" == "Initial plan"* ]]; then
+              skip=true
+            fi
+          # Check pull request events
+          elif [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+            pr_title="$(jq -r .pull_request.title < $GITHUB_EVENT_PATH)"
+            if [[ "$pr_title" == "[WIP]"* ]]; then
+              skip=true
+            fi
+          fi
+
+          echo "skip=$skip" >> $GITHUB_OUTPUT
