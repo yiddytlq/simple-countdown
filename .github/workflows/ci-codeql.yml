@@ -11,7 +11,7 @@ jobs:
 
   codeql:
     needs: pre-check
-    if: ${{ needs.pre-check.outputs.skip != 'true' }}
+    if: needs.pre-check.outputs.skip != 'true'
     runs-on: ubuntu-latest
     permissions:
       actions: read
