@@ -1,0 +1,49 @@
+name: Deploy to GitHub Pages
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch to deploy from"
+        required: true
+        default: "main"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.branch }}
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: npm install
+      - name: Set variables and build
+        env:
+          TIMER_BACKGROUND: ${{ secrets.TIMER_BACKGROUND }}
+          TIMER_TARGET: ${{ secrets.TIMER_TARGET }}
+          TIMER_TITLE: ${{ secrets.TIMER_TITLE }}
+          PUBLIC_URL: https://yiddytlq.github.io/simple-countdown
+        run: |
+          ./variables.sh public
+          npm run build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./build
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
