@@ -12,19 +12,18 @@ on:
   workflow_dispatch:
     inputs:
       job_type:
-        description: 'Which lint/build job to run'
+        description: "Which lint/build job to run"
         required: true
-        default: 'full'
+        default: "full"
         type: choice
         options:
           - full
           - partial
       branch:
-        description: 'Branch to run on'
+        description: "Branch to run on"
         required: true
-        default: 'main'
+        default: "main"
         type: string
-
 
 jobs:
   partial-lint:
