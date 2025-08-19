@@ -41,22 +41,15 @@ services:
 
 > This method builds the project following the env variables you gave, producing a `build` folder that has to be served manually afterwards. You can use [`serve`](https://www.npmjs.com/package/serve) to achieve it
 
-Use `npm` to install dependencies and build the project:
+Use `yarn` to use the build script from the
+`package.json`. Simply use `yarn build`. Use the variables above in the env to personalize your countdown
 
 - `npm install`
-- `TIMER_TITLE="example" npm run build`
+- `TIMER_TITLE="example" yarn build`
 
 > Variables will be taken from env, and are the same as above
 
-I.E: `TIMER_TARGET="Fri Oct 01 2021 15:33:36 GMT+0200" npm run build && serve -s -l tcp://0.0.0.0:3000 build/`
-
-## Package Manager
-
-This project uses **npm** exclusively for dependency management. Please do not use yarn or other package managers to avoid dependency resolution conflicts.
-
-For optimal performance:
-- Use `npm ci` for production builds
-- Use `npm install` for development
+I.E: `TIMER_TARGET="Fri Oct 01 2021 15:33:36 GMT+0200" yarn build && serve -s -l tcp://0.0.0.0:3000 build/`
 
 ## Credits
 

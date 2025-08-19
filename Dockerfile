@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:13.12.0-alpine
 
 WORKDIR /app
 
@@ -11,7 +11,7 @@ RUN npm install serve -g
 COPY package.json ./
 COPY package-lock.json ./
 
-RUN npm ci --cache /tmp/.npm
+RUN npm install --silent
 
 COPY . ./
 

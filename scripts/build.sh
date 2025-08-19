@@ -2,5 +2,5 @@
 
 if [[ "$ENVIRONMENT" != "DEV" ]]
 then
-    npm run build
+    yarn build
 fi
