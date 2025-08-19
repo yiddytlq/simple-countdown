@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: "Branch to run the check on"
+        description: 'Branch to run the check on'
         required: true
-        default: "main"
+        default: 'main'
 
 jobs:
   run-check:
