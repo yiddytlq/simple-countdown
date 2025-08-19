@@ -23,7 +23,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - run: npm install
+      - run: npm ci
       - name: Set variables and build
         env:
           TIMER_BACKGROUND: ${{ secrets.TIMER_BACKGROUND }}

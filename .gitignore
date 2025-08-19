@@ -23,4 +23,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Alternative package manager lockfiles (project uses npm only)
+yarn.lock
+pnpm-lock.yaml
+
 public/variables-final.js
