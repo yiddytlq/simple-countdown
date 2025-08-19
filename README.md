@@ -41,15 +41,14 @@ services:
 
 > This method builds the project following the env variables you gave, producing a `build` folder that has to be served manually afterwards. You can use [`serve`](https://www.npmjs.com/package/serve) to achieve it
 
-Use `yarn` to use the build script from the
-`package.json`. Simply use `yarn build`. Use the variables above in the env to personalize your countdown
+Use `npm` to build the project with the scripts in `package.json`. Simply use `npm run build`. Use the variables above in the env to personalize your countdown
 
 - `npm install`
-- `TIMER_TITLE="example" yarn build`
+- `TIMER_TITLE="example" npm run build`
 
 > Variables will be taken from env, and are the same as above
 
-I.E: `TIMER_TARGET="Fri Oct 01 2021 15:33:36 GMT+0200" yarn build && serve -s -l tcp://0.0.0.0:3000 build/`
+I.E: `TIMER_TARGET="Fri Oct 01 2021 15:33:36 GMT+0200" npm run build && serve -s -l tcp://0.0.0.0:3000 build/`
 
 ## Credits
 

@@ -8,10 +8,9 @@ ENV ENVIRONMENT ${ENVIRONMENT:-PRODUCTION}
 RUN apk add bash
 RUN npm install serve -g
 
-COPY package.json ./
-COPY package-lock.json ./
+COPY package*.json ./
 
-RUN npm install --silent
+RUN npm ci --silent
 
 COPY . ./
 
