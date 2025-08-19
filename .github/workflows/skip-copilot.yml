@@ -4,7 +4,7 @@ on:
   workflow_call:
     outputs:
       skip:
-        type: boolean
+        type: string
 
 jobs:
   check:
