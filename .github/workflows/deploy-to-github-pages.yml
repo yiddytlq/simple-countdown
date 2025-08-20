@@ -22,7 +22,10 @@ jobs:
           ref: ${{ github.event.inputs.branch }}
       - uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
+          cache: 'npm'
+      - name: Upgrade npm to latest
+        run: npm install -g npm@latest
       - run: npm install
       - name: Set variables and build
         env:

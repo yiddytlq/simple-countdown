@@ -31,5 +31,4 @@ jobs:
               skip=true
             fi
           fi
-
           echo "skip=$skip" >> $GITHUB_OUTPUT

@@ -1,12 +1,12 @@
-FROM node:13.12.0-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
 ARG ENVIRONMENT
-ENV ENVIRONMENT ${ENVIRONMENT:-PRODUCTION}
+ENV ENVIRONMENT=${ENVIRONMENT:-PRODUCTION}
 
-RUN apk add bash
-RUN npm install serve -g
+# Install bash and upgrade npm to latest version
+RUN apk add --no-cache bash && npm install -g npm@latest serve
 
 COPY package.json ./
 COPY package-lock.json ./
