@@ -16,7 +16,9 @@
     "build": "./variables.sh public && react-scripts build",
     "lint": "eslint src/**/*.{js,jsx,ts,tsx}",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "export-issues": "node scripts/export-issues.js",
+    "test-export-issues": "node scripts/test-export-issues.js"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -34,7 +36,7 @@
     ]
   },
   "devDependencies": {
-    "eslint": "^8.2.0",
+    "eslint": "^8.57.1",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-plugin-import": "^2.25.3",
     "eslint-plugin-jsx-a11y": "^6.5.1",

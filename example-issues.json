@@ -1,0 +1,106 @@
+[
+  {
+    "id": 123,
+    "title": "Main feature implementation",
+    "state": "open",
+    "author": "alice",
+    "labels": [
+      "feature",
+      "priority-high"
+    ],
+    "body": "This is the main issue for implementing the new feature.\n\nSub-issues: #124, #125",
+    "created_at": "2025-08-20T12:34:56Z",
+    "comments": [
+      {
+        "id": 456,
+        "body": "This looks good, let's proceed with the sub-tasks.",
+        "author": "alice",
+        "created_at": "2025-08-21T14:30:00Z"
+      },
+      {
+        "id": 457,
+        "body": "I'll work on the frontend part #124",
+        "author": "bob",
+        "created_at": "2025-08-22T09:00:00Z"
+      }
+    ],
+    "sub_issues": [
+      {
+        "id": 124,
+        "title": "Sub-task: Frontend implementation",
+        "state": "open",
+        "author": "bob",
+        "labels": [
+          "frontend",
+          "feature"
+        ],
+        "body": "Sub-issue of #123\n\nImplement the frontend components.",
+        "created_at": "2025-08-22T12:34:56Z",
+        "comments": [
+          {
+            "id": 500,
+            "body": "Started working on this. Need to create sub-task #126 for the complex component.",
+            "author": "bob",
+            "created_at": "2025-08-25T11:00:00Z"
+          }
+        ],
+        "sub_issues": [
+          {
+            "id": 126,
+            "title": "Nested sub-task",
+            "state": "open",
+            "author": "alice",
+            "labels": [
+              "subtask"
+            ],
+            "body": "Child of #124\n\nThis is a nested sub-task.",
+            "created_at": "2025-08-25T12:34:56Z",
+            "comments": [
+              {
+                "id": 700,
+                "body": "Working on the component implementation.",
+                "author": "alice",
+                "created_at": "2025-08-25T15:00:00Z"
+              }
+            ],
+            "sub_issues": []
+          }
+        ]
+      },
+      {
+        "id": 125,
+        "title": "Sub-task: Backend API",
+        "state": "closed",
+        "author": "charlie",
+        "labels": [
+          "backend",
+          "feature"
+        ],
+        "body": "Part of #123\n\nImplement the backend API endpoints.",
+        "created_at": "2025-08-22T13:45:20Z",
+        "comments": [
+          {
+            "id": 600,
+            "body": "API endpoints completed and tested.",
+            "author": "charlie",
+            "created_at": "2025-08-25T09:00:00Z"
+          }
+        ],
+        "sub_issues": []
+      }
+    ]
+  },
+  {
+    "id": 127,
+    "title": "Independent issue",
+    "state": "open",
+    "author": "dave",
+    "labels": [
+      "bug"
+    ],
+    "body": "This is an independent issue with no relationships.",
+    "created_at": "2025-08-26T08:15:30Z",
+    "comments": [],
+    "sub_issues": []
+  }
+]
