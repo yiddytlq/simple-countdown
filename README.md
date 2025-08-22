@@ -51,6 +51,23 @@ Use `yarn` to use the build script from the
 
 I.E: `TIMER_TARGET="Fri Oct 01 2021 15:33:36 GMT+0200" yarn build && serve -s -l tcp://0.0.0.0:3000 build/`
 
+## Issue Export
+
+This repository includes a script to export all GitHub issues (including sub-issues) to a structured JSON file. The script automatically detects sub-issue relationships from issue text and builds a nested JSON structure.
+
+**Quick Start:**
+```bash
+# Export all repository issues to issues.json
+npm run export-issues
+
+# Test the export script with mock data  
+npm run test-export-issues
+```
+
+**Prerequisites:** GitHub CLI must be installed and authenticated (`gh auth login`)
+
+See [scripts/README-export-issues.md](scripts/README-export-issues.md) for detailed documentation and [example-issues.json](example-issues.json) for sample output format.
+
 ## Credits
 
 This project is based on the original [easy-countdown](https://github.com/Yooooomi/easy-countdown) by Yooooomi.
