@@ -1,10 +1,15 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
 
 /**
- * Export GitHub repository issues and sub-issues to JSON
+ * Export GitHub repository issues and sub-issues to JSON using gh-sub-issue extension
  *
- * This script uses GitHub CLI to fetch all issues, comments, and builds
- * a nested structure representing issue relationships.
+ * This script uses GitHub CLI and the gh-sub-issue extension to fetch all issues
+ * and their sub-issue relationships, building a nested structure.
+ *
+ * Requirements:
+ * - GitHub CLI (gh) installed and authenticated
+ * - gh-sub-issue extension: gh extension install yahsan2/gh-sub-issue
  *
  * Usage: node scripts/export-issues.js
  * Output: issues.json in repository root
@@ -18,8 +23,6 @@ class IssueExporter {
   constructor() {
     this.issues = new Map();
     this.issueRelationships = new Map(); // Maps child issue ID to parent issue ID
-    this.pendingSubTasks = new Set();
-    this.epicIssues = new Set();
   }
 
   /**
@@ -27,7 +30,10 @@ class IssueExporter {
    */
   static executeGhCommand(command) {
     try {
-      const result = execSync(command, { encoding: 'utf8' });
+      const result = execSync(command, {
+        encoding: 'utf8',
+        env: { ...process.env, GH_TOKEN: process.env.GITHUB_TOKEN },
+      });
       return JSON.parse(result);
     } catch (error) {
       console.error(`Error executing command: ${command}`);
@@ -37,9 +43,24 @@ class IssueExporter {
   }
 
   /**
+   * Check if gh-sub-issue extension is available
+   */
+  static checkSubIssueExtension() {
+    try {
+      execSync('gh sub-issue --help', {
+        stdio: 'pipe',
+        env: { ...process.env, GH_TOKEN: process.env.GITHUB_TOKEN },
+      });
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
    * Fetch all issues from the repository
    */
-  async fetchAllIssues() {
+  static fetchAllIssues() {
     console.log('Fetching all issues...');
 
     const command = 'gh issue list --state all --json number,title,state,author,labels,body,createdAt,updatedAt --limit 1000';
@@ -57,7 +78,10 @@ class IssueExporter {
       // Use --json without jq to get raw JSON, then parse in Node.js for
       // cross-platform compatibility
       const command = `gh issue view ${issueNumber} --json comments`;
-      const result = execSync(command, { encoding: 'utf8' });
+      const result = execSync(command, {
+        encoding: 'utf8',
+        env: { ...process.env, GH_TOKEN: process.env.GITHUB_TOKEN },
+      });
 
       if (!result.trim()) {
         return [];
@@ -80,132 +104,26 @@ class IssueExporter {
   }
 
   /**
-   * Parse issue body and comments to identify sub-issue relationships
+   * Fetch sub-issues for a specific issue using gh-sub-issue extension
    */
-  parseIssueRelationships(issue, comments) {
-    const allText = [issue.body, ...comments.map((c) => c.body)].join(' ');
-
-    // Strategy 1: Label-based relationships
-    this.parseLabelBasedRelationships(issue);
-
-    // Strategy 2: Related Issues section parsing
-    this.parseRelatedIssuesSection(issue, allText);
-
-    // Strategy 3: Traditional text patterns (for compatibility)
-    this.parseTraditionalPatterns(issue, allText);
-  }
-
-  /**
-   * Parse label-based relationships (sub-task, epic)
-   */
-  parseLabelBasedRelationships(issue) {
-    const labels = issue.labels.map((label) => label.name);
-
-    // If this issue has 'sub-task' label, try to find its parent epic
-    if (labels.includes('sub-task')) {
-      // Look for epic issues that could be the parent
-      // We'll do this in a second pass after all issues are loaded
-      this.pendingSubTasks.add(issue.number);
-    }
-
-    // If this issue has 'epic' label, mark it as a potential parent
-    if (labels.includes('epic')) {
-      this.epicIssues.add(issue.number);
-    }
-  }
-
-  /**
-   * Parse Related Issues section for references
-   */
-  parseRelatedIssuesSection(issue, allText) {
-    // Look for "### Related Issues" section
-    const relatedSection = allText.match(/### Related Issues\s*(.*?)(?=###|$)/s);
-    if (relatedSection && relatedSection[1].trim() !== '_No response_') {
-      const content = relatedSection[1].trim();
-
-      // Extract issue numbers from Related Issues section
-      const issueReferences = content.match(/#(\d+)/g);
-      if (issueReferences) {
-        issueReferences.forEach((ref) => {
-          const referencedId = parseInt(ref.substring(1), 10);
-          if (referencedId !== issue.number) {
-            // For sub-tasks, referenced issues are likely parents
-            const labels = issue.labels.map((label) => label.name);
-            if (labels.includes('sub-task')) {
-              this.issueRelationships.set(issue.number, referencedId);
-              console.log(`Found relationship: #${issue.number} is child of #${referencedId} (Related Issues)`);
-            }
-          }
-        });
-      }
-
-      // Look for specific context patterns
-      const contextPatterns = [
-        /Research in #(\d+)/gi,
-        /Installation in #(\d+)/gi,
-        /Pipeline in #(\d+)/gi,
-        /Epic:?\s*#(\d+)/gi,
-      ];
-
-      contextPatterns.forEach((pattern) => {
-        const matches = content.matchAll(pattern);
-        // eslint-disable-next-line no-restricted-syntax
-        for (const match of matches) {
-          const parentId = parseInt(match[1], 10);
-          if (parentId !== issue.number) {
-            this.issueRelationships.set(issue.number, parentId);
-            console.log(`Found relationship: #${issue.number} is child of #${parentId} (${match[0]})`);
-          }
-        }
+  static fetchSubIssues(issueNumber) {
+    try {
+      const command = `gh sub-issue list ${issueNumber} --json`;
+      const result = execSync(command, {
+        encoding: 'utf8',
+        env: { ...process.env, GH_TOKEN: process.env.GITHUB_TOKEN },
       });
-    }
-  }
 
-  /**
-   * Parse traditional text patterns for backward compatibility
-   */
-  parseTraditionalPatterns(issue, allText) {
-    const relationshipPatterns = [
-      /sub-issue of #(\d+)/gi,
-      /child of #(\d+)/gi,
-      /relates to #(\d+)/gi,
-      /part of #(\d+)/gi,
-      /subtask of #(\d+)/gi,
-    ];
-
-    const parentPatterns = [
-      /sub-issues?:?\s*#(\d+)/gi,
-      /children:?\s*#(\d+)/gi,
-      /subtasks?:?\s*#(\d+)/gi,
-    ];
-
-    // Look for this issue being a child of another
-    // eslint-disable-next-line no-restricted-syntax
-    for (const pattern of relationshipPatterns) {
-      const matches = allText.matchAll(pattern);
-      // eslint-disable-next-line no-restricted-syntax
-      for (const match of matches) {
-        const parentId = parseInt(match[1], 10);
-        if (parentId !== issue.number) {
-          this.issueRelationships.set(issue.number, parentId);
-          console.log(`Found relationship: #${issue.number} is child of #${parentId} (traditional pattern)`);
-          break; // Only take the first parent relationship found
-        }
+      if (!result.trim()) {
+        return [];
       }
-    }
 
-    // Look for this issue being a parent of others
-    // eslint-disable-next-line no-restricted-syntax
-    for (const pattern of parentPatterns) {
-      const matches = allText.matchAll(pattern);
-      // eslint-disable-next-line no-restricted-syntax
-      for (const match of matches) {
-        const childId = parseInt(match[1], 10);
-        if (childId !== issue.number) {
-          this.issueRelationships.set(childId, issue.number);
-          console.log(`Found relationship: #${childId} is child of #${issue.number} (traditional pattern)`);
-        }
-      }
+      const data = JSON.parse(result);
+      return data || [];
+    } catch (error) {
+      // If the command fails, it likely means no sub-issues exist for this issue
+      // or the extension isn't available
+      return [];
     }
   }
 
@@ -232,82 +150,7 @@ class IssueExporter {
   }
 
   /**
-   * Process label-based relationships in second pass
-   */
-  processLabelBasedRelationships() {
-    if (!this.pendingSubTasks || !this.epicIssues) {
-      return;
-    }
-
-    console.log('Processing label-based relationships...');
-
-    // For each sub-task, try to find its epic parent
-    // eslint-disable-next-line no-restricted-syntax
-    for (const subTaskId of this.pendingSubTasks) {
-      // If this sub-task doesn't already have a parent relationship
-      if (!this.issueRelationships.has(subTaskId)) {
-        // Try to find the most appropriate epic for this sub-task
-        // For now, we can use a simple heuristic: find epics that are logically related
-
-        const subTaskIssue = this.issues.get(subTaskId);
-        if (!subTaskIssue) {
-          // eslint-disable-next-line no-continue
-          continue;
-        }
-
-        // Look for topic-based matching with epics
-        // eslint-disable-next-line no-restricted-syntax
-        for (const epicId of this.epicIssues) {
-          const epicIssue = this.issues.get(epicId);
-          if (!epicIssue) {
-            // eslint-disable-next-line no-continue
-            continue;
-          }
-
-          // Simple heuristic: if sub-task mentions topics related to the epic
-          if (IssueExporter.areIssuesRelated(subTaskIssue, epicIssue)) {
-            this.issueRelationships.set(subTaskId, epicId);
-            console.log(`Found relationship: #${subTaskId} is child of #${epicId} (label-based matching)`);
-            break; // Only assign to one epic
-          }
-        }
-      }
-    }
-  }
-
-  /**
-   * Simple heuristic to determine if two issues are related based on content
-   */
-  static areIssuesRelated(subTask, epic) {
-    // Convert titles and bodies to lowercase for matching
-    const subTaskText = (`${subTask.title} ${subTask.body}`).toLowerCase();
-    const epicText = (`${epic.title} ${epic.body}`).toLowerCase();
-
-    // Define topic keywords for different epics
-    const topicMappings = {
-      'ui customization': ['color', 'font', 'style', 'css', 'theme', 'appearance', 'display'],
-      'package management': ['npm', 'yarn', 'package', 'install', 'dependency', 'node'],
-      typescript: ['typescript', 'type', 'ts', 'tsx', 'interface'],
-      tailwind: ['tailwind', 'css', 'style', 'utility', 'classes'],
-      modernization: ['upgrade', 'update', 'modern', 'latest', 'version'],
-      docker: ['docker', 'container', 'image', 'build'],
-    };
-
-    // Check if epic and sub-task share common topics
-    // eslint-disable-next-line no-restricted-syntax
-    for (const [, keywords] of Object.entries(topicMappings)) {
-      const epicHasTopic = keywords.some((keyword) => epicText.includes(keyword));
-      const subTaskHasTopic = keywords.some((keyword) => subTaskText.includes(keyword));
-
-      if (epicHasTopic && subTaskHasTopic) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-  /**
-   * Build nested issue structure based on relationships
+   * Build nested issue structure based on relationships from gh-sub-issue extension
    */
   buildNestedStructure() {
     const rootIssues = [];
@@ -342,6 +185,57 @@ class IssueExporter {
   }
 
   /**
+   * Parse issue body and comments to identify sub-issue relationships (fallback method)
+   */
+  parseIssueRelationships(issue, comments) {
+    const allText = [issue.body, ...comments.map((c) => c.body)].join(' ');
+
+    // Traditional text patterns for backward compatibility
+    const relationshipPatterns = [
+      /sub-issue of #(\d+)/gi,
+      /child of #(\d+)/gi,
+      /relates to #(\d+)/gi,
+      /part of #(\d+)/gi,
+      /subtask of #(\d+)/gi,
+    ];
+
+    const parentPatterns = [
+      /sub-issues?:?\s*#(\d+)/gi,
+      /children:?\s*#(\d+)/gi,
+      /subtasks?:?\s*#(\d+)/gi,
+    ];
+
+    // Look for this issue being a child of another
+    // eslint-disable-next-line no-restricted-syntax
+    for (const pattern of relationshipPatterns) {
+      const matches = allText.matchAll(pattern);
+      // eslint-disable-next-line no-restricted-syntax
+      for (const match of matches) {
+        const parentId = parseInt(match[1], 10);
+        if (parentId !== issue.number) {
+          this.issueRelationships.set(issue.number, parentId);
+          console.log(`Found relationship: #${issue.number} is child of #${parentId} (text pattern)`);
+          break; // Only take the first parent relationship found
+        }
+      }
+    }
+
+    // Look for this issue being a parent of others
+    // eslint-disable-next-line no-restricted-syntax
+    for (const pattern of parentPatterns) {
+      const matches = allText.matchAll(pattern);
+      // eslint-disable-next-line no-restricted-syntax
+      for (const match of matches) {
+        const childId = parseInt(match[1], 10);
+        if (childId !== issue.number) {
+          this.issueRelationships.set(childId, issue.number);
+          console.log(`Found relationship: #${childId} is child of #${issue.number} (text pattern)`);
+        }
+      }
+    }
+  }
+
+  /**
    * Main export function
    */
   async exportIssues() {
@@ -350,13 +244,25 @@ class IssueExporter {
 
       // Check if gh CLI is available and authenticated
       try {
-        execSync('gh auth status', { stdio: 'pipe' });
+        execSync('gh auth status', {
+          stdio: 'pipe',
+          env: { ...process.env, GH_TOKEN: process.env.GITHUB_TOKEN },
+        });
       } catch (error) {
         throw new Error('GitHub CLI is not authenticated. Please run "gh auth login" first.');
       }
 
+      // Check if gh-sub-issue extension is available
+      const hasSubIssueExtension = IssueExporter.checkSubIssueExtension();
+      if (hasSubIssueExtension) {
+        console.log('✓ gh-sub-issue extension detected');
+      } else {
+        console.log('⚠ gh-sub-issue extension not available, using fallback text parsing');
+        console.log('  Install with: gh extension install yahsan2/gh-sub-issue');
+      }
+
       // Fetch all issues
-      const rawIssues = await this.fetchAllIssues();
+      const rawIssues = IssueExporter.fetchAllIssues();
 
       // Process each issue
       // eslint-disable-next-line no-restricted-syntax
@@ -373,12 +279,41 @@ class IssueExporter {
         // Store the issue
         this.issues.set(rawIssue.number, transformedIssue);
 
-        // Parse relationships
-        this.parseIssueRelationships(rawIssue, comments);
-      }
+        if (hasSubIssueExtension) {
+          // Use gh-sub-issue extension to get relationships
+          try {
+            // eslint-disable-next-line no-await-in-loop
+            const subIssues = IssueExporter.fetchSubIssues(rawIssue.number);
 
-      // Second pass: process label-based relationships
-      this.processLabelBasedRelationships();
+            if (subIssues && subIssues.length > 0) {
+              subIssues.forEach((subIssue) => {
+                // Extract issue number from URL or use direct number
+                let subIssueNumber;
+                if (typeof subIssue === 'object' && subIssue.number) {
+                  subIssueNumber = subIssue.number;
+                } else if (typeof subIssue === 'string') {
+                  const match = subIssue.match(/#(\d+)/);
+                  if (match) {
+                    subIssueNumber = parseInt(match[1], 10);
+                  }
+                } else if (typeof subIssue === 'number') {
+                  subIssueNumber = subIssue;
+                }
+
+                if (subIssueNumber && subIssueNumber !== rawIssue.number) {
+                  this.issueRelationships.set(subIssueNumber, rawIssue.number);
+                  console.log(`Found relationship: #${subIssueNumber} is child of #${rawIssue.number} (gh-sub-issue extension)`);
+                }
+              });
+            }
+          } catch (error) {
+            console.warn(`Could not fetch sub-issues for #${rawIssue.number}: ${error.message}`);
+          }
+        } else {
+          // Fallback to text parsing
+          this.parseIssueRelationships(rawIssue, comments);
+        }
+      }
 
       // Build nested structure
       console.log('Building nested issue structure...');
@@ -393,6 +328,12 @@ class IssueExporter {
       console.log(`- Root issues: ${nestedIssues.length}`);
       console.log(`- Relationships found: ${this.issueRelationships.size}`);
       console.log(`- Output file: ${outputPath}`);
+
+      if (hasSubIssueExtension) {
+        console.log('- Method: gh-sub-issue extension');
+      } else {
+        console.log('- Method: text pattern parsing (fallback)');
+      }
 
       return nestedIssues;
     } catch (error) {

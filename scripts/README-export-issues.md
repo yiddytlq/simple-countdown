@@ -1,11 +1,12 @@
 # Issue Export Script
 
-This script exports all GitHub repository issues (including sub-issues) to a structured JSON file.
+This script exports all GitHub repository issues (including sub-issues) to a structured JSON file using the gh-sub-issue extension for accurate relationship detection.
 
 ## Prerequisites
 
 - [GitHub CLI](https://cli.github.com/) installed and authenticated
 - Node.js (any recent version)
+- **Recommended**: gh-sub-issue extension for accurate sub-issue relationship detection
 - **Cross-platform compatibility**: Works on Windows, macOS, and Linux
 
 ## Setup
@@ -25,6 +26,11 @@ This script exports all GitHub repository issues (including sub-issues) to a str
 2. Authenticate with GitHub:
    ```bash
    gh auth login
+   ```
+
+3. Install the gh-sub-issue extension (recommended):
+   ```bash
+   gh extension install yahsan2/gh-sub-issue
    ```
 
 ## Usage
