@@ -52,15 +52,23 @@ class IssueExporter {
    */
   async fetchIssueComments(issueNumber) {
     try {
-      const command = `gh issue view ${issueNumber} --json comments --jq '.comments[] | {id: .id, body: .body, author: .author.login, createdAt: .createdAt}'`;
+      // Use --json without jq to get raw JSON, then parse in Node.js for cross-platform compatibility
+      const command = `gh issue view ${issueNumber} --json comments`;
       const result = execSync(command, { encoding: 'utf8' });
       
       if (!result.trim()) {
         return [];
       }
       
-      // Parse multiple JSON objects separated by newlines
-      const comments = result.trim().split('\n').map(line => JSON.parse(line));
+      const data = JSON.parse(result);
+      // Transform the comments to our desired format
+      const comments = (data.comments || []).map(comment => ({
+        id: comment.id,
+        body: comment.body,
+        author: comment.author.login,
+        createdAt: comment.createdAt
+      }));
+      
       return comments;
     } catch (error) {
       console.warn(`Could not fetch comments for issue #${issueNumber}: ${error.message}`);

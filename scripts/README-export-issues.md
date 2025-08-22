@@ -6,6 +6,7 @@ This script exports all GitHub repository issues (including sub-issues) to a str
 
 - [GitHub CLI](https://cli.github.com/) installed and authenticated
 - Node.js (any recent version)
+- **Cross-platform compatibility**: Works on Windows, macOS, and Linux
 
 ## Setup
 
