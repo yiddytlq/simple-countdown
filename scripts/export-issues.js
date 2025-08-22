@@ -392,7 +392,7 @@ class IssueExporter {
           // Use gh-sub-issue extension to get relationships
           try {
             // eslint-disable-next-line no-await-in-loop
-            const result = IssueExporter.fetchSubIssues(rawIssue.number);
+            const result = await IssueExporter.fetchSubIssues(rawIssue.number);
 
             // The gh sub-issue list command returns:
             // { parent: {...}, subIssues: [...], total: N, openCount: N }
