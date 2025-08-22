@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
-/* eslint-disable quotes */
 
 /**
  * Export GitHub repository issues and sub-issues to JSON using gh-sub-issue extension
@@ -16,9 +15,9 @@
  * Output: issues.json in repository root
  */
 
-const { execSync } = require("child_process");
-const fs = require("fs");
-const path = require("path");
+const { execSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
 
 class IssueExporter {
   constructor() {
@@ -33,7 +32,7 @@ class IssueExporter {
   static executeGhCommand(command) {
     try {
       const result = execSync(command, {
-        encoding: "utf8",
+        encoding: 'utf8',
         env: { ...process.env, GH_TOKEN: process.env.GITHUB_TOKEN },
       });
       return JSON.parse(result);
@@ -49,8 +48,8 @@ class IssueExporter {
    */
   static checkSubIssueExtension() {
     try {
-      execSync("gh sub-issue --help", {
-        stdio: "pipe",
+      execSync('gh sub-issue --help', {
+        stdio: 'pipe',
         env: { ...process.env, GH_TOKEN: process.env.GITHUB_TOKEN },
       });
       return true;
@@ -63,9 +62,9 @@ class IssueExporter {
    * Fetch all issues from the repository
    */
   static fetchAllIssues() {
-    console.log("Fetching all issues...");
+    console.log('Fetching all issues...');
 
-    const command = "gh issue list --state all --json number,title,state,author,labels,body,createdAt,updatedAt --limit 1000";
+    const command = 'gh issue list --state all --json number,title,state,author,labels,body,createdAt,updatedAt --limit 1000';
     const issues = IssueExporter.executeGhCommand(command);
 
     console.log(`Found ${issues.length} issues`);
@@ -81,7 +80,7 @@ class IssueExporter {
       // cross-platform compatibility
       const command = `gh issue view ${issueNumber} --json comments`;
       const result = execSync(command, {
-        encoding: "utf8",
+        encoding: 'utf8',
         env: { ...process.env, GH_TOKEN: process.env.GITHUB_TOKEN },
       });
 
@@ -114,7 +113,7 @@ class IssueExporter {
     try {
       const command = `gh sub-issue list ${issueNumber} --json`;
       const result = execSync(command, {
-        encoding: "utf8",
+        encoding: 'utf8',
         env: { ...process.env, GH_TOKEN: process.env.GITHUB_TOKEN },
       });
 
@@ -141,7 +140,7 @@ class IssueExporter {
       state: issue.state.toLowerCase(),
       author: issue.author.login,
       labels: issue.labels.map((label) => label.name),
-      body: issue.body || "",
+      body: issue.body || '',
       created_at: issue.createdAt,
       comments: comments.map((comment) => ({
         id: parseInt(comment.id, 10),
@@ -193,7 +192,7 @@ class IssueExporter {
    * Note: Each issue can only have one parent in the hierarchy structure
    */
   parseIssueRelationships(issue, comments) {
-    const allText = [issue.body, ...comments.map((c) => c.body)].join("\n");
+    const allText = [issue.body, ...comments.map((c) => c.body)].join('\n');
 
     // Skip if relationship already found (prioritize earlier detection methods)
     if (this.issueRelationships.has(issue.number)) {
@@ -246,7 +245,7 @@ class IssueExporter {
 
       // Special handling for epic issues - if this issue has "epic" label,
       // the related issues are its children, not parents
-      const isEpic = issue.labels && issue.labels.some((label) => label.name === "epic");
+      const isEpic = issue.labels && issue.labels.some((label) => label.name === 'epic');
 
       if (isEpic) {
         // Look for list items like "- #2", "- #3", "- #25" and make them children of this epic
@@ -338,12 +337,12 @@ class IssueExporter {
    */
   async exportIssues() {
     try {
-      console.log("Starting issue export...");
+      console.log('Starting issue export...');
 
       // Check if gh CLI is available and authenticated
       try {
-        execSync("gh auth status", {
-          stdio: "pipe",
+        execSync('gh auth status', {
+          stdio: 'pipe',
           env: { ...process.env, GH_TOKEN: process.env.GITHUB_TOKEN },
         });
       } catch (error) {
@@ -355,13 +354,13 @@ class IssueExporter {
       // Check if gh-sub-issue extension is available
       const hasSubIssueExtension = IssueExporter.checkSubIssueExtension();
       if (hasSubIssueExtension) {
-        console.log("✓ gh-sub-issue extension detected");
+        console.log('✓ gh-sub-issue extension detected');
       } else {
         console.log(
-          "⚠ gh-sub-issue extension not available, using fallback text parsing",
+          '⚠ gh-sub-issue extension not available, using fallback text parsing',
         );
         console.log(
-          "  Install with: gh extension install yahsan2/gh-sub-issue",
+          '  Install with: gh extension install yahsan2/gh-sub-issue',
         );
       }
 
@@ -400,14 +399,14 @@ class IssueExporter {
               result.subIssues.forEach((subIssue) => {
                 // Extract issue number from the subIssue object
                 let subIssueNumber;
-                if (typeof subIssue === "object" && subIssue.number) {
+                if (typeof subIssue === 'object' && subIssue.number) {
                   subIssueNumber = subIssue.number;
-                } else if (typeof subIssue === "string") {
+                } else if (typeof subIssue === 'string') {
                   const match = subIssue.match(/#(\d+)/);
                   if (match) {
                     subIssueNumber = parseInt(match[1], 10);
                   }
-                } else if (typeof subIssue === "number") {
+                } else if (typeof subIssue === 'number') {
                   subIssueNumber = subIssue;
                 }
 
@@ -431,28 +430,28 @@ class IssueExporter {
       }
 
       // Build nested structure
-      console.log("Building nested issue structure...");
+      console.log('Building nested issue structure...');
       const nestedIssues = this.buildNestedStructure();
 
       // Write to file
-      const outputPath = path.join(process.cwd(), "issues.json");
+      const outputPath = path.join(process.cwd(), 'issues.json');
       fs.writeFileSync(outputPath, JSON.stringify(nestedIssues, null, 2));
 
-      console.log("\\nExport completed successfully!");
+      console.log('\\nExport completed successfully!');
       console.log(`- Total issues processed: ${this.issues.size}`);
       console.log(`- Root issues: ${nestedIssues.length}`);
       console.log(`- Relationships found: ${this.issueRelationships.size}`);
       console.log(`- Output file: ${outputPath}`);
 
       if (hasSubIssueExtension) {
-        console.log("- Method: gh-sub-issue extension");
+        console.log('- Method: gh-sub-issue extension');
       } else {
-        console.log("- Method: text pattern parsing (fallback)");
+        console.log('- Method: text pattern parsing (fallback)');
       }
 
       return nestedIssues;
     } catch (error) {
-      console.error("Export failed:", error.message);
+      console.error('Export failed:', error.message);
       throw error;
     }
   }
