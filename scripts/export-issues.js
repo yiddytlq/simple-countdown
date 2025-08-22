@@ -22,7 +22,8 @@ const path = require('path');
 class IssueExporter {
   constructor() {
     this.issues = new Map();
-    this.issueRelationships = new Map(); // Maps child issue ID to parent issue ID
+    // Maps child issue ID to parent issue ID (only one parent per child)
+    this.issueRelationships = new Map();
   }
 
   /**
@@ -186,50 +187,110 @@ class IssueExporter {
 
   /**
    * Parse issue body and comments to identify sub-issue relationships (fallback method)
+   * Note: Each issue can only have one parent in the hierarchy structure
    */
   parseIssueRelationships(issue, comments) {
-    const allText = [issue.body, ...comments.map((c) => c.body)].join(' ');
+    const allText = [issue.body, ...comments.map((c) => c.body)].join('\n');
 
-    // Traditional text patterns for backward compatibility
+    // Skip if relationship already found (prioritize earlier detection methods)
+    if (this.issueRelationships.has(issue.number)) {
+      return;
+    }
+
+    // Patterns for "Epic:" references - indicates this issue is a child of the epic
+    // (HIGHEST PRIORITY)
+    const epicPattern = /_?Epic:\s*#(\d+)_?/gi;
+    const epicMatches = allText.matchAll(epicPattern);
+    // eslint-disable-next-line no-restricted-syntax
+    for (const match of epicMatches) {
+      const parentId = parseInt(match[1], 10);
+      if (parentId !== issue.number && !this.issueRelationships.has(issue.number)) {
+        this.issueRelationships.set(issue.number, parentId);
+        console.log(`Found relationship: #${issue.number} is child of #${parentId} (Epic reference)`);
+        return; // Only one parent per issue
+      }
+    }
+
+    // Patterns for "Research in #X" type references (MEDIUM PRIORITY)
+    const contextualPattern = /(?:research|installation|pipeline|task|sub-?task|work|part)\s+in\s+#(\d+)/gi;
+    const contextualMatches = allText.matchAll(contextualPattern);
+    // eslint-disable-next-line no-restricted-syntax
+    for (const match of contextualMatches) {
+      const parentId = parseInt(match[1], 10);
+      if (parentId !== issue.number && !this.issueRelationships.has(issue.number)) {
+        this.issueRelationships.set(issue.number, parentId);
+        console.log(`Found relationship: #${issue.number} is child of #${parentId} (contextual reference)`);
+        return; // Only one parent per issue
+      }
+    }
+
+    // Find Related Issues section and parse it properly (LOWER PRIORITY)
+    const relatedSectionMatch = allText.match(/### Related Issues\s*([\s\S]*?)(?=###|$)/);
+    if (relatedSectionMatch) {
+      const relatedContent = relatedSectionMatch[1];
+
+      // Special handling for epic issues - if this issue has "epic" label,
+      // the related issues are its children, not parents
+      const isEpic = issue.labels && issue.labels.some((label) => label.name === 'epic');
+
+      if (isEpic) {
+        // Look for list items like "- #2", "- #3", "- #25" and make them children of this epic
+        const listItemMatches = relatedContent.matchAll(/[-*]\s*#(\d+)/g);
+        // eslint-disable-next-line no-restricted-syntax
+        for (const match of listItemMatches) {
+          const childId = parseInt(match[1], 10);
+          if (childId !== issue.number && !this.issueRelationships.has(childId)) {
+            this.issueRelationships.set(childId, issue.number);
+            console.log(`Found relationship: #${childId} is child of #${issue.number} (Epic child list)`);
+          }
+        }
+      } else {
+        // For non-epic issues, look for the first parent reference
+        // Look for list items like "- #2", "- #3", "- #25"
+        const listItemMatches = relatedContent.matchAll(/[-*]\s*#(\d+)/g);
+        // eslint-disable-next-line no-restricted-syntax
+        for (const match of listItemMatches) {
+          const parentId = parseInt(match[1], 10);
+          if (parentId !== issue.number && !this.issueRelationships.has(issue.number)) {
+            this.issueRelationships.set(issue.number, parentId);
+            console.log(`Found relationship: #${issue.number} is child of #${parentId} (Related Issues list)`);
+            return; // Only one parent per issue
+          }
+        }
+
+        // Look for single issue references in related issues section
+        const singleRefMatches = relatedContent.matchAll(/(?:^|\s)#(\d+)(?=\s|$)/g);
+        // eslint-disable-next-line no-restricted-syntax
+        for (const match of singleRefMatches) {
+          const parentId = parseInt(match[1], 10);
+          if (parentId !== issue.number && !this.issueRelationships.has(issue.number)) {
+            this.issueRelationships.set(issue.number, parentId);
+            console.log(`Found relationship: #${issue.number} is child of #${parentId} (Related Issues reference)`);
+            return; // Only one parent per issue
+          }
+        }
+      }
+    }
+
+    // Traditional relationship patterns (LOWEST PRIORITY)
     const relationshipPatterns = [
-      /sub-issue of #(\d+)/gi,
+      /sub-?issue of #(\d+)/gi,
       /child of #(\d+)/gi,
       /relates to #(\d+)/gi,
       /part of #(\d+)/gi,
       /subtask of #(\d+)/gi,
     ];
 
-    const parentPatterns = [
-      /sub-issues?:?\s*#(\d+)/gi,
-      /children:?\s*#(\d+)/gi,
-      /subtasks?:?\s*#(\d+)/gi,
-    ];
-
-    // Look for this issue being a child of another
     // eslint-disable-next-line no-restricted-syntax
     for (const pattern of relationshipPatterns) {
       const matches = allText.matchAll(pattern);
       // eslint-disable-next-line no-restricted-syntax
       for (const match of matches) {
         const parentId = parseInt(match[1], 10);
-        if (parentId !== issue.number) {
+        if (parentId !== issue.number && !this.issueRelationships.has(issue.number)) {
           this.issueRelationships.set(issue.number, parentId);
-          console.log(`Found relationship: #${issue.number} is child of #${parentId} (text pattern)`);
-          break; // Only take the first parent relationship found
-        }
-      }
-    }
-
-    // Look for this issue being a parent of others
-    // eslint-disable-next-line no-restricted-syntax
-    for (const pattern of parentPatterns) {
-      const matches = allText.matchAll(pattern);
-      // eslint-disable-next-line no-restricted-syntax
-      for (const match of matches) {
-        const childId = parseInt(match[1], 10);
-        if (childId !== issue.number) {
-          this.issueRelationships.set(childId, issue.number);
-          console.log(`Found relationship: #${childId} is child of #${issue.number} (text pattern)`);
+          console.log(`Found relationship: #${issue.number} is child of #${parentId} (traditional pattern)`);
+          return; // Only one parent per issue
         }
       }
     }
