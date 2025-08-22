@@ -344,11 +344,13 @@ class IssueExporter {
           // Use gh-sub-issue extension to get relationships
           try {
             // eslint-disable-next-line no-await-in-loop
-            const subIssues = IssueExporter.fetchSubIssues(rawIssue.number);
+            const result = IssueExporter.fetchSubIssues(rawIssue.number);
 
-            if (subIssues && subIssues.length > 0) {
-              subIssues.forEach((subIssue) => {
-                // Extract issue number from URL or use direct number
+            // The gh sub-issue list command returns:
+            // { parent: {...}, subIssues: [...], total: N, openCount: N }
+            if (result && result.subIssues && result.subIssues.length > 0) {
+              result.subIssues.forEach((subIssue) => {
+                // Extract issue number from the subIssue object
                 let subIssueNumber;
                 if (typeof subIssue === 'object' && subIssue.number) {
                   subIssueNumber = subIssue.number;
