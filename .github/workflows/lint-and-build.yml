@@ -49,6 +49,17 @@ jobs:
           echo "⏱️ Starting npm ci at $(date)"
           time npm ci
           echo "✅ Dependencies installed at $(date)"
+      - name: Report build metrics
+        run: |
+          echo "📊 Build Performance Metrics:"
+          echo "- Node.js version: $(node --version)"
+          echo "- npm version: $(npm --version)"
+          echo "- Cache location: $(npm config get cache)"
+          if [ -d "$(npm config get cache)" ]; then
+            echo "- Cache size: $(du -sh $(npm config get cache) | cut -f1)"
+            echo "- Cache files: $(find $(npm config get cache) -type f | wc -l)"
+          fi
+          echo "- node_modules size: $(du -sh node_modules | cut -f1)"
       - name: Get changed JS/TS files
         id: changed_files
         run: |
@@ -82,6 +93,17 @@ jobs:
           echo "⏱️ Starting npm ci at $(date)"
           time npm ci
           echo "✅ Dependencies installed at $(date)"
+      - name: Report build metrics
+        run: |
+          echo "📊 Build Performance Metrics:"
+          echo "- Node.js version: $(node --version)"
+          echo "- npm version: $(npm --version)"
+          echo "- Cache location: $(npm config get cache)"
+          if [ -d "$(npm config get cache)" ]; then
+            echo "- Cache size: $(du -sh $(npm config get cache) | cut -f1)"
+            echo "- Cache files: $(find $(npm config get cache) -type f | wc -l)"
+          fi
+          echo "- node_modules size: $(du -sh node_modules | cut -f1)"
       - name: Run Full ESLint
         run: npm run lint
       - name: Build project (with timing)
