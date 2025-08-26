@@ -42,9 +42,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
-      - name: Install dependencies
-        run: npm install
+          node-version: 20
+          cache: 'npm'
+      - name: Install dependencies (with timing)
+        run: |
+          echo "⏱️ Starting npm ci at $(date)"
+          time npm ci
+          echo "✅ Dependencies installed at $(date)"
       - name: Get changed JS/TS files
         id: changed_files
         run: |
@@ -71,13 +75,20 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
-      - name: Install dependencies
-        run: npm install
+          node-version: 20
+          cache: 'npm'
+      - name: Install dependencies (with timing)
+        run: |
+          echo "⏱️ Starting npm ci at $(date)"
+          time npm ci
+          echo "✅ Dependencies installed at $(date)"
       - name: Run Full ESLint
         run: npm run lint
-      - name: Build project
-        run: npm run build
+      - name: Build project (with timing)
+        run: |
+          echo "⏱️ Starting build at $(date)"
+          time npm run build
+          echo "✅ Build completed at $(date)"
       - name: Upload full lint/build results
         uses: actions/upload-artifact@v4
         with:
