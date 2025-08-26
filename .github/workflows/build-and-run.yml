@@ -19,13 +19,35 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
+          cache: 'npm'
 
-      - name: Install dependencies
-        run: npm install
+      - name: Upgrade npm to latest
+        run: npm install -g npm@latest
 
-      - name: Build project
-        run: npm run build
+      - name: Install dependencies (with timing)
+        run: |
+          echo "⏱️ Starting npm ci at $(date)"
+          time npm ci
+          echo "✅ Dependencies installed at $(date)"
+
+      - name: Report build metrics
+        run: |
+          echo "📊 Build Performance Metrics:"
+          echo "- Node.js version: $(node --version)"
+          echo "- npm version: $(npm --version)"
+          echo "- Cache location: $(npm config get cache)"
+          if [ -d "$(npm config get cache)" ]; then
+            echo "- Cache size: $(du -sh $(npm config get cache) | cut -f1)"
+            echo "- Cache files: $(find $(npm config get cache) -type f | wc -l)"
+          fi
+          echo "- node_modules size: $(du -sh node_modules | cut -f1)"
+
+      - name: Build project (with timing)
+        run: |
+          echo "⏱️ Starting build at $(date)"
+          time npm run build
+          echo "✅ Build completed at $(date)"
 
       - name: Start app in background
         run: nohup npm start &

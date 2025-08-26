@@ -42,9 +42,26 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
-      - name: Install dependencies
-        run: npm install
+          node-version: 20
+          cache: 'npm'
+      - name: Upgrade npm to latest
+        run: npm install -g npm@latest
+      - name: Install dependencies (with timing)
+        run: |
+          echo "⏱️ Starting npm ci at $(date)"
+          time npm ci
+          echo "✅ Dependencies installed at $(date)"
+      - name: Report build metrics
+        run: |
+          echo "📊 Build Performance Metrics:"
+          echo "- Node.js version: $(node --version)"
+          echo "- npm version: $(npm --version)"
+          echo "- Cache location: $(npm config get cache)"
+          if [ -d "$(npm config get cache)" ]; then
+            echo "- Cache size: $(du -sh $(npm config get cache) | cut -f1)"
+            echo "- Cache files: $(find $(npm config get cache) -type f | wc -l)"
+          fi
+          echo "- node_modules size: $(du -sh node_modules | cut -f1)"
       - name: Get changed JS/TS files
         id: changed_files
         run: |
@@ -71,13 +88,33 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
-      - name: Install dependencies
-        run: npm install
+          node-version: 20
+          cache: 'npm'
+      - name: Upgrade npm to latest
+        run: npm install -g npm@latest
+      - name: Install dependencies (with timing)
+        run: |
+          echo "⏱️ Starting npm ci at $(date)"
+          time npm ci
+          echo "✅ Dependencies installed at $(date)"
+      - name: Report build metrics
+        run: |
+          echo "📊 Build Performance Metrics:"
+          echo "- Node.js version: $(node --version)"
+          echo "- npm version: $(npm --version)"
+          echo "- Cache location: $(npm config get cache)"
+          if [ -d "$(npm config get cache)" ]; then
+            echo "- Cache size: $(du -sh $(npm config get cache) | cut -f1)"
+            echo "- Cache files: $(find $(npm config get cache) -type f | wc -l)"
+          fi
+          echo "- node_modules size: $(du -sh node_modules | cut -f1)"
       - name: Run Full ESLint
         run: npm run lint
-      - name: Build project
-        run: npm run build
+      - name: Build project (with timing)
+        run: |
+          echo "⏱️ Starting build at $(date)"
+          time npm run build
+          echo "✅ Build completed at $(date)"
       - name: Upload full lint/build results
         uses: actions/upload-artifact@v4
         with:

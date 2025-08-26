@@ -22,8 +22,15 @@ jobs:
           ref: ${{ github.event.inputs.branch }}
       - uses: actions/setup-node@v3
         with:
-          node-version: 18
-      - run: npm install
+          node-version: 20
+          cache: 'npm'
+      - name: Upgrade npm to latest
+        run: npm install -g npm@latest
+      - name: Install dependencies (with timing)
+        run: |
+          echo "⏱️ Starting npm ci at $(date)"
+          time npm ci
+          echo "✅ Dependencies installed at $(date)"
       - name: Set variables and build
         env:
           TIMER_BACKGROUND: ${{ secrets.TIMER_BACKGROUND }}
