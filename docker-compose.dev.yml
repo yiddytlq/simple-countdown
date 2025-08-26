@@ -5,7 +5,7 @@ services:
     build:
       args:
         ENVIRONMENT: "DEV"
-    command: yarn start
+    command: npm start
     volumes:
       - "./src/:/app/src/"
       - "./public/:/app/public/"
