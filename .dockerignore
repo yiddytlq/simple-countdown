@@ -1,5 +1,53 @@
 node_modules
-docker-compose.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.npm-cache
+
+# Git files
+.git
 .gitignore
-README.md
+.gitattributes
+
+# Docker files
+docker-compose.*
 Dockerfile
+
+# Documentation
+README.md
+*.md
+docs/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test and coverage files
+coverage/
+.nyc_output
+test/
+tests/
+**/*.test.js
+**/*.spec.js
+
+# Build artifacts
+build/
+dist/
+
+# Environment files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Temporary files
+tmp/
+temp/
