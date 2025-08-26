@@ -44,6 +44,8 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
+      - name: Upgrade npm to latest
+        run: npm install -g npm@latest
       - name: Install dependencies (with timing)
         run: |
           echo "⏱️ Starting npm ci at $(date)"
@@ -88,6 +90,8 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
+      - name: Upgrade npm to latest
+        run: npm install -g npm@latest
       - name: Install dependencies (with timing)
         run: |
           echo "⏱️ Starting npm ci at $(date)"
