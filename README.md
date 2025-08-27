@@ -56,18 +56,6 @@ Use `npm` to use the build script from the
 
 I.E: `TIMER_TARGET="Fri Oct 01 2021 15:33:36 GMT+0200" npm run build && serve -s -l tcp://0.0.0.0:3000 build/`
 
-### Performance Optimizations
-
-This project includes several npm configuration optimizations that improve install times by 40-60%:
-
-- **Offline-first installs**: Uses local cache when possible (`prefer-offline=true`)
-- **Cleaner CI logs**: Disables progress bars in CI environments (`progress=false`)
-- **Exact version pinning**: Ensures reproducible builds (`save-exact=true`)
-- **Security optimization**: Separates audit from install process (`audit=false`)
-- **Reduced noise**: Suppresses funding messages (`fund=false`)
-
-These settings are configured in `.npmrc` and work automatically across development, CI, and production environments.
-
 ## Credits
 
 This project is based on the original [easy-countdown](https://github.com/Yooooomi/easy-countdown) by Yooooomi.
