@@ -24,3 +24,5 @@ yarn-debug.log*
 yarn-error.log*
 
 public/variables-final.js
+
+.npm-cache
