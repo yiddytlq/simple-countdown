@@ -1,6 +1,6 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-if [[ "$ENVIRONMENT" != "DEV" ]]
+if [ "$ENVIRONMENT" != "DEV" ]
 then
     npm run build
 fi
