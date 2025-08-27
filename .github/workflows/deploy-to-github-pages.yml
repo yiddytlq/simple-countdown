@@ -26,7 +26,11 @@ jobs:
           cache: 'npm'
       - name: Upgrade npm to latest
         run: npm install -g npm@latest
-      - run: npm install
+      - name: Install dependencies (with timing)
+        run: |
+          echo "⏱️ Starting npm ci at $(date)"
+          time npm ci
+          echo "✅ Dependencies installed at $(date)"
       - name: Set variables and build
         env:
           TIMER_BACKGROUND: ${{ secrets.TIMER_BACKGROUND }}
