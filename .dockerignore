@@ -12,7 +12,7 @@ yarn-error.log*
 
 # Docker files
 docker-compose.*
-Dockerfile
+# Note: Don't exclude Dockerfile for remote builds
 
 # Documentation
 README.md
