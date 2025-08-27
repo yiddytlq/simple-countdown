@@ -41,11 +41,6 @@ services:
 
 > This method builds the project following the env variables you gave, producing a `build` folder that has to be served manually afterwards. You can use [`serve`](https://www.npmjs.com/package/serve) to achieve it
 
-### Requirements
-
-- Node.js >=20.0.0 (LTS)
-- npm >=10.0.0
-
 Use `npm` to use the build script from the
 `package.json`. Simply use `npm run build`. Use the variables above in the env to personalize your countdown
 
