@@ -24,6 +24,11 @@ jobs:
 
       - name: Upgrade npm to latest
         run: npm install -g npm@latest
+          node-version: 20
+          cache: 'npm'
+
+      - name: Upgrade npm to latest
+        run: npm install -g npm@latest
 
       - name: Install dependencies (with timing)
         run: |

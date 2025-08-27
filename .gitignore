@@ -27,3 +27,5 @@ yarn-error.log*
 .npm-cache/
 
 public/variables-final.js
+
+.npm-cache
