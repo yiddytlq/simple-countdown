@@ -1,0 +1,44 @@
+# Simplified Dockerfile for testing remote builds in Portainer
+# This version eliminates potential issues with remote Git contexts
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Copy package files first for better caching
+COPY package*.json ./
+
+# Install dependencies 
+RUN npm ci --only=production --silent
+
+# Copy source code
+COPY . .
+
+# Make scripts executable and build
+RUN chmod +x ./scripts/build.sh ./variables.sh
+RUN ./scripts/build.sh
+
+# Production stage
+FROM node:20-alpine AS production
+
+WORKDIR /app
+
+# Install serve globally with error handling
+RUN npm install -g serve || (sleep 5 && npm install -g serve)
+
+# Set environment
+ARG ENVIRONMENT=PRODUCTION
+ENV ENVIRONMENT=${ENVIRONMENT}
+
+# Copy build artifacts and scripts
+COPY --from=builder /app/build ./build
+COPY --from=builder /app/variables.sh ./variables.sh
+
+# Ensure script is executable
+RUN chmod +x ./variables.sh
+
+# Health check for better container orchestration
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3000/ || exit 1
+
+# Use exec form for proper signal handling
+CMD ["sh", "-c", "./variables.sh build && serve -s -l tcp://0.0.0.0:3000 build/"]

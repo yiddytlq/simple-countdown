@@ -19,7 +19,12 @@ on:
     types: [created]
 
 jobs:
+  pre-check:
+    uses: ./.github/workflows/skip-copilot.yml
+    
   notify:
+    needs: pre-check
+    if: needs.pre-check.outputs.skip != 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Determine if workflow should notify

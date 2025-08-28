@@ -1,6 +1,6 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-if [[ "$ENVIRONMENT" != "DEV" ]]
+if [ "$ENVIRONMENT" != "DEV" ]
 then
-    yarn build
+    npm run build
 fi
