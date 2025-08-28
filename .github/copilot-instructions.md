@@ -40,6 +40,27 @@ Copilot operates only when **assigned** and **explicitly instructed** via labels
 - Posts detailed plans/comments **before** any commits or PRs.
 - Commits, pushes, or PRs **require explicit "approved to commit" confirmation**.
 
+### 3a. Branch Selection Logic
+
+When creating a new branch or PR, Copilot must **not assume `master` as the base by default**. Instead, follow this logic:
+
+1. **Check the current issue**  
+   - If the issue has a linked branch, base all changes and the PR on that branch.  
+
+2. **Check parent issues recursively**  
+   - If the current issue does not have a linked branch, check its parent issue.  
+   - Continue climbing the parent chain until a branch is found.  
+
+3. **Fallback**  
+   - If no branch is linked at any level, then base changes on `master`.  
+
+Branches should follow the pattern:
+```
+{issue-type}/issue-{number}-{short-description}
+```
+
+PRs must always target the **same branch that was identified as the base** by this logic.
+
 ---
 
 ## Mode Activation Protocol
