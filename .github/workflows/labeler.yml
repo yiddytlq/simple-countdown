@@ -64,8 +64,17 @@ jobs:
             if (eventType === "pull_request_target") {
               issueNumber = context.payload.pull_request.number;
               if (context.payload.pull_request.merged) {
-                labelsToAdd.push("status:done");
-                labelsToRemove.push(...statusLabels.filter(l => l !== "status:done"));
+                const targetBranch = context.payload.pull_request.base.ref;
+                
+                if (targetBranch === 'master') {
+                  // When merged into master, set status:done and remove done:feature-branch
+                  labelsToAdd.push("status:done");
+                  labelsToRemove.push(...statusLabels.filter(l => l !== "status:done"));
+                } else {
+                  // When merged into non-master branch (like test-for-99), add done:feature-branch
+                  labelsToAdd.push("done:feature-branch");
+                  labelsToRemove.push("status:in-review", "status:changes-needed", "status:approval-needed", "status:info-needed");
+                }
               }
             }
 
