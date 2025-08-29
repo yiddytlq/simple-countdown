@@ -9,13 +9,9 @@ on:
   # Track PR review submissions
   pull_request_review:
     types: [submitted]
-  # Track PR merge or close
+  # Track PR merge or close for done:feature-branch labeling
   pull_request_target:
     types: [closed]
-  # Track status check updates for done:feature-branch labeling
-  status:
-  check_suite:
-    types: [completed]
 
 jobs:
   # File-based labeler
@@ -64,76 +60,16 @@ jobs:
             if (eventType === "pull_request_target") {
               issueNumber = context.payload.pull_request.number;
               if (context.payload.pull_request.merged) {
-                labelsToAdd.push("status:done");
-                labelsToRemove.push(...statusLabels.filter(l => l !== "status:done"));
-              }
-            }
-
-            // Handle done:feature-branch labeling for PRs targeting master with passing checks
-            if (eventType === "pull_request" || eventType === "status" || eventType === "check_suite") {
-              let pullRequest;
-              
-              if (eventType === "pull_request") {
-                pullRequest = context.payload.pull_request;
-                issueNumber = pullRequest.number;
-              } else if (eventType === "status" || eventType === "check_suite") {
-                // For status/check_suite events, we need to find associated PRs
-                const associatedPRs = await github.request('GET /search/issues', {
-                  q: `repo:${context.repo.owner}/${context.repo.repo} is:pr is:open ${context.payload.sha || context.payload.check_suite?.head_sha}`
-                });
+                const targetBranch = context.payload.pull_request.base.ref;
                 
-                if (associatedPRs.data.items.length > 0) {
-                  const prNumber = associatedPRs.data.items[0].number;
-                  const { data: prData } = await github.pulls.get({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    pull_number: prNumber
-                  });
-                  pullRequest = prData;
-                  issueNumber = prNumber;
-                }
-              }
-
-              if (pullRequest && pullRequest.base.ref === 'master' && pullRequest.state === 'open') {
-                // Check if required status checks are passing
-                const { data: statusChecks } = await github.request('GET /repos/{owner}/{repo}/commits/{ref}/status', {
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  ref: pullRequest.head.sha
-                });
-
-                const { data: checkRuns } = await github.request('GET /repos/{owner}/{repo}/commits/{ref}/check-runs', {
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  ref: pullRequest.head.sha
-                });
-
-                // Consider checks passing if:
-                // 1. No required status checks are failing
-                // 2. All check runs are either successful, neutral, or skipped
-                const statusSuccess = statusChecks.state === 'success' || statusChecks.statuses.length === 0;
-                const checksSuccess = checkRuns.check_runs.every(check => 
-                  ['success', 'neutral', 'skipped'].includes(check.conclusion) || check.conclusion === null
-                );
-
-                if (statusSuccess && checksSuccess) {
-                  // Add done:feature-branch if not already present
-                  const { data: currentLabels } = await github.issues.listLabelsOnIssue({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    issue_number: issueNumber
-                  });
-                  
-                  const hasFeatureBranchLabel = currentLabels.some(label => label.name === 'done:feature-branch');
-                  
-                  if (!hasFeatureBranchLabel) {
-                    labelsToAdd.push("done:feature-branch");
-                    // Remove conflicting status labels when adding done:feature-branch
-                    labelsToRemove.push("status:in-review", "status:changes-needed", "status:approval-needed", "status:info-needed");
-                  }
+                if (targetBranch === 'master') {
+                  // When merged into master, set status:done and remove done:feature-branch
+                  labelsToAdd.push("status:done");
+                  labelsToRemove.push(...statusLabels.filter(l => l !== "status:done"));
                 } else {
-                  // Remove done:feature-branch if checks are failing
-                  labelsToRemove.push("done:feature-branch");
+                  // When merged into non-master branch, add done:feature-branch
+                  labelsToAdd.push("done:feature-branch");
+                  labelsToRemove.push("status:in-review", "status:changes-needed", "status:approval-needed", "status:info-needed");
                 }
               }
             }
