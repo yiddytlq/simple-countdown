@@ -12,6 +12,11 @@
 
 import logger from './utils/logger';
 
+interface ServiceWorkerConfig {
+  onSuccess?: (_registration: ServiceWorkerRegistration) => void; // eslint-disable-line no-unused-vars
+  onUpdate?: (_registration: ServiceWorkerRegistration) => void; // eslint-disable-line no-unused-vars
+}
+
 const isLocalhost = Boolean(
   window.location.hostname === 'localhost'
   // [::1] is the IPv6 localhost address.
@@ -22,11 +27,10 @@ const isLocalhost = Boolean(
   ),
 );
 
-function registerValidSW(swUrl, config) {
+function registerValidSW(swUrl: string, config?: ServiceWorkerConfig): void {
   navigator.serviceWorker
     .register(swUrl)
-    .then((registration) => {
-      // eslint-disable-next-line no-param-reassign
+    .then((registration: ServiceWorkerRegistration) => {
       registration.onupdatefound = () => {
         const installingWorker = registration.installing;
         if (installingWorker == null) {
@@ -62,17 +66,17 @@ function registerValidSW(swUrl, config) {
         };
       };
     })
-    .catch((error) => {
+    .catch((error: Error) => {
       logger.error('Error during service worker registration:', error);
     });
 }
 
-function checkValidServiceWorker(swUrl, config) {
+function checkValidServiceWorker(swUrl: string, config?: ServiceWorkerConfig): void {
   // Check if the service worker can be found. If it can't reload the page.
   fetch(swUrl, {
     headers: { 'Service-Worker': 'script' },
   })
-    .then((response) => {
+    .then((response: Response) => {
       // Ensure service worker exists, and that we really are getting a JS file.
       const contentType = response.headers.get('content-type');
       if (
@@ -80,7 +84,7 @@ function checkValidServiceWorker(swUrl, config) {
         || (contentType != null && contentType.indexOf('javascript') === -1)
       ) {
         // No service worker found. Probably a different app. Reload the page.
-        navigator.serviceWorker.ready.then((registration) => {
+        navigator.serviceWorker.ready.then((registration: ServiceWorkerRegistration) => {
           registration.unregister().then(() => {
             window.location.reload();
           });
@@ -97,10 +101,10 @@ function checkValidServiceWorker(swUrl, config) {
     });
 }
 
-export function register(config) {
+export function register(config?: ServiceWorkerConfig): void {
   if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
     // The URL constructor is available in all browsers that support SW.
-    const publicUrl = new URL(process.env.PUBLIC_URL, window.location.href);
+    const publicUrl = new URL(process.env.PUBLIC_URL || '', window.location.href);
     if (publicUrl.origin !== window.location.origin) {
       // Our service worker won't work if PUBLIC_URL is on a different origin
       // from what our page is served on. This might happen if a CDN is used to
@@ -109,7 +113,7 @@ export function register(config) {
     }
 
     window.addEventListener('load', () => {
-      const swUrl = `${process.env.PUBLIC_URL}/service-worker.js`;
+      const swUrl = `${process.env.PUBLIC_URL || ''}/service-worker.js`;
 
       if (isLocalhost) {
         // This is running on localhost. Let's check if a service worker still exists or not.
@@ -131,13 +135,13 @@ export function register(config) {
   }
 }
 
-export function unregister() {
+export function unregister(): void {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.ready
-      .then((registration) => {
+      .then((registration: ServiceWorkerRegistration) => {
         registration.unregister();
       })
-      .catch((error) => {
+      .catch((error: Error) => {
         logger.error(error.message);
       });
   }
