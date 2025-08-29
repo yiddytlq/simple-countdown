@@ -28,6 +28,3 @@ public/variables-final.js
 # Issue export files
 issues-test.json
 issues.json
-
-# Test documentation files
-test-labeler-functionality.md
