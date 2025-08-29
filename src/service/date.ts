@@ -1,18 +1,30 @@
+interface TimeUnit {
+  nb: number;
+  label: 'day' | 'hour' | 'minute' | 'second';
+}
+
+interface TimeDescription {
+  day: number;
+  hour: number;
+  minute: number;
+  second: number;
+}
+
 const day = 1000 * 60 * 60 * 24;
 const hour = 1000 * 60 * 60;
 const minute = 1000 * 60;
 const second = 1000;
 
-const numbers = [
+const numbers: TimeUnit[] = [
   { nb: day, label: 'day' },
   { nb: hour, label: 'hour' },
   { nb: minute, label: 'minute' },
   { nb: second, label: 'second' },
 ];
 
-export default function describe(a, b) {
+export default function describe(a: Date, b: Date): TimeDescription {
   let ms = Math.abs(b.getTime() - a.getTime());
-  const result = {};
+  const result = {} as TimeDescription;
 
   for (let i = 0; i < numbers.length; i += 1) {
     const field = numbers[i].label;

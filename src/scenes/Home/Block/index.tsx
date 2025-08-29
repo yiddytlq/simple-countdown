@@ -1,10 +1,15 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import cl from 'classnames';
 import s from './index.module.css';
 import NumberDisplay from '../NumberDisplay';
 
-function Block({ className, value, title }) {
+interface BlockProps {
+  className?: string;
+  value: string;
+  title: string;
+}
+
+function Block({ className = '', value, title }: BlockProps) {
   return (
     <div className={cl(s.root, className)}>
       <div className={s.numbers}>
@@ -15,15 +20,5 @@ function Block({ className, value, title }) {
     </div>
   );
 }
-
-Block.propTypes = {
-  className: PropTypes.string,
-  value: PropTypes.string.isRequired,
-  title: PropTypes.string.isRequired,
-};
-
-Block.defaultProps = {
-  className: '',
-};
 
 export default Block;

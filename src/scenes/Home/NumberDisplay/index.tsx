@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import s from './index.module.css';
+
+interface NumberDisplayProps {
+  value: number;
+}
 
 const ten = Array.from(Array(10).keys());
 
-function NumberDisplay({ value: v }) {
+function NumberDisplay({ value: v }: NumberDisplayProps) {
   const [fd, setFd] = useState(true);
 
   useEffect(() => {
@@ -23,9 +26,5 @@ function NumberDisplay({ value: v }) {
     </div>
   );
 }
-
-NumberDisplay.propTypes = {
-  value: PropTypes.number.isRequired,
-};
 
 export default NumberDisplay;
