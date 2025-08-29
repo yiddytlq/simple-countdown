@@ -28,7 +28,6 @@ export default function describe(a: Date, b: Date): TimeDescription {
 
   for (let i = 0; i < numbers.length; i += 1) {
     const field = numbers[i].label;
-    // eslint-disable-next-line prefer-destructuring
     const nb = numbers[i].nb; // Keeping explicit property access to maintain correct digit display
 
     result[field] = Math.floor(ms / nb);

@@ -13,7 +13,6 @@ function Block({ className = '', value, title }: BlockProps) {
   return (
     <div className={cl(s.root, className)}>
       <div className={s.numbers}>
-        {/* eslint-disable-next-line react/no-array-index-key */}
         {value.split('').map((v, k) => <NumberDisplay value={+v} key={k} />)}
       </div>
       <div className={s.title}>{title}</div>

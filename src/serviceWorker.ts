@@ -13,8 +13,8 @@
 import logger from './utils/logger';
 
 interface ServiceWorkerConfig {
-  onSuccess?: (_registration: ServiceWorkerRegistration) => void;
-  onUpdate?: (_registration: ServiceWorkerRegistration) => void;
+  onSuccess?: (_registration: ServiceWorkerRegistration) => void; // eslint-disable-line no-unused-vars
+  onUpdate?: (_registration: ServiceWorkerRegistration) => void; // eslint-disable-line no-unused-vars
 }
 
 const isLocalhost = Boolean(
@@ -31,7 +31,6 @@ function registerValidSW(swUrl: string, config?: ServiceWorkerConfig): void {
   navigator.serviceWorker
     .register(swUrl)
     .then((registration: ServiceWorkerRegistration) => {
-      // eslint-disable-next-line no-param-reassign
       registration.onupdatefound = () => {
         const installingWorker = registration.installing;
         if (installingWorker == null) {
