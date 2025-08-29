@@ -100,7 +100,7 @@ jobs:
             if (issueNumber) {
               // Remove old status labels
               for (const label of labelsToRemove) {
-                await github.issues.removeLabel({
+                await github.rest.issues.removeLabel({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: issueNumber,
@@ -110,7 +110,7 @@ jobs:
 
               // Add new status labels
               if (labelsToAdd.length > 0) {
-                await github.issues.addLabels({
+                await github.rest.issues.addLabels({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: issueNumber,
