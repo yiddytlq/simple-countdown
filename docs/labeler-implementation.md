@@ -6,8 +6,8 @@ This document explains the implementation of automatic `done:feature-branch` lab
 
 The labeler workflow now automatically manages issue labels based on which branch a PR is merged into:
 
-- **Non-master branch merges** → Add `done:feature-branch` label
-- **Master branch merges** → Add `status:done` label, remove `done:feature-branch`
+- **Non-master branch merges** → Add `done:feature-branch` label to linked issue
+- **Master branch merges** → Add `status:done` label to linked issue, remove `done:feature-branch`
 
 ## Key Changes Made
 
@@ -29,25 +29,37 @@ on:
 
 **Why:** Removed resource-intensive `status:` and `check_suite:` events that caused performance issues in the previous implementation.
 
-### 2. Branch-Based Logic
+### 2. Issue-Based Labeling Logic
 ```javascript
 if (eventType === "pull_request_target") {
-  issueNumber = context.payload.pull_request.number;
   if (context.payload.pull_request.merged) {
     const targetBranch = context.payload.pull_request.base.ref;
     
-    if (targetBranch === 'master') {
-      // Master merge: status:done
-      labelsToAdd.push("status:done");
-      labelsToRemove.push(...statusLabels.filter(l => l !== "status:done"));
-    } else {
-      // Non-master merge: done:feature-branch
-      labelsToAdd.push("done:feature-branch");
-      labelsToRemove.push("status:in-review", "status:changes-needed", "status:approval-needed", "status:info-needed");
+    // Extract linked issue number from PR title or body
+    const prTitle = context.payload.pull_request.title || '';
+    const prBody = context.payload.pull_request.body || '';
+    const issuePattern = /(?:fix(?:es|ed)?|close(?:s|d)?|resolve(?:s|d)?)\s*#(\d+)/i;
+    let linkedIssueMatch = prTitle.match(issuePattern) || prBody.match(issuePattern);
+    
+    if (linkedIssueMatch) {
+      issueNumber = parseInt(linkedIssueMatch[1]); // Label the ISSUE, not the PR
+      
+      if (targetBranch === 'master') {
+        // Master merge: status:done
+        labelsToAdd.push("status:done");
+        labelsToRemove.push(...statusLabels.filter(l => l !== "status:done"));
+      } else {
+        // Non-master merge: done:feature-branch
+        labelsToAdd.push("done:feature-branch");
+        labelsToRemove.push("status:in-review", "status:changes-needed", 
+          "status:approval-needed", "status:info-needed");
+      }
     }
   }
 }
 ```
+
+**Key Change:** The workflow now extracts the linked issue number from PR title/body patterns like "Fixes #99" and labels the **issue**, not the pull request.
 
 ## Usage Examples
 
