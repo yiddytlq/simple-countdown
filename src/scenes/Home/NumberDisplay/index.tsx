@@ -18,9 +18,14 @@ function NumberDisplay({ value: v }: NumberDisplayProps) {
 
   return (
     <div className={s.value}>
-      <div className={s.numbercontainer} style={{ transform: `translateY(-${value * 100}px)` }}>
-        {ten.map((t) => (
-          <div className={s.number} style={{ top: `${t * 100}px` }} key={t}>{t}</div>
+      <div
+        className={s.numbercontainer}
+        style={{ transform: `translateY(-${value * 100}px)` }}
+      >
+        {ten.map(t => (
+          <div className={s.number} style={{ top: `${t * 100}px` }} key={t}>
+            {t}
+          </div>
         ))}
       </div>
     </div>
