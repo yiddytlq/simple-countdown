@@ -17,9 +17,14 @@ function Home() {
   const described = useMemo(() => describe(date, end), [date]);
 
   return (
-    <div className={s.root} style={{ backgroundImage: `url('${window.background}')` }}>
+    <div
+      className={s.root}
+      style={{ backgroundImage: `url('${window.background}')` }}
+    >
       <div>
-        {(window.title && window.title.length > 0) && <div className={s.title}>{window.title}</div>}
+        {window.title && window.title.length > 0 && (
+          <div className={s.title}>{window.title}</div>
+        )}
         <div className={s.blocks}>
           {Object.entries(described).map(([key, value]) => (
             <Block
