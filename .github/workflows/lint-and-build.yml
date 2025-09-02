@@ -36,11 +36,11 @@ jobs:
         (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_type == 'partial'))
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.branch }}
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
@@ -82,11 +82,11 @@ jobs:
         (github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_type == 'full'))
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.branch }}
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
@@ -116,10 +116,16 @@ jobs:
           npx tsc --noEmit
           echo "✅ TypeScript type check completed at $(date)"
       - name: Build project (with timing)
+        env:
+          # Support both legacy TIMER_ and new VITE_ variables
+          TIMER_BACKGROUND: ""
+          TIMER_TARGET: "2025-12-31T23:59:59"
+          TIMER_TITLE: "Test Build"
         run: |
           echo "⏱️ Starting build at $(date)"
           time npm run build
           echo "✅ Build completed at $(date)"
+          echo "📁 Build output size: $(du -sh build | cut -f1)"
       - name: Upload full lint/build results
         uses: actions/upload-artifact@v4
         with:
