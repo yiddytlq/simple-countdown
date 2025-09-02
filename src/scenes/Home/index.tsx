@@ -24,10 +24,10 @@ function Home() {
         {window.title && window.title.length > 0 && (
           <div className="mb-4 text-3xl text-white">{window.title}</div>
         )}
-        <div className="flex flex-row items-start justify-center max-lg:flex-col">
+        <div className="flex flex-row items-start justify-center max-[1020px]:flex-col">
           {Object.entries(described).map(([key, value]) => (
             <Block
-              className="mr-4 max-lg:mr-0 max-lg:mb-4"
+              className="mr-4 max-[1020px]:mr-0 max-[1020px]:mb-4"
               key={key}
               title={`${key}${value > 1 ? 's' : ''}`}
               value={value.toString().padStart(2, '0')}
