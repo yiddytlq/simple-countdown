@@ -31,8 +31,8 @@ export default defineConfig({
     port: 3000
   },
   
-  // Define environment variables prefix - support TIMER_ prefix only
-  envPrefix: ['TIMER_'],
+  // Define environment variables prefix
+  envPrefix: ['VITE_', 'TIMER_'],
   
   // Ensure proper handling of public assets
   publicDir: 'public',
