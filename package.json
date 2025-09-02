@@ -7,25 +7,25 @@
     "npm": ">=11.5.0"
   },
   "dependencies": {
-    "@testing-library/jest-dom": "^6.4.2",
     "@testing-library/react": "^14.2.1",
     "@testing-library/user-event": "^14.5.2",
     "classnames": "^2.5.1",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-scripts": "^5.0.1"
+    "react-dom": "^18.3.1"
   },
   "scripts": {
-    "start": "./variables.sh public && react-scripts start",
-    "build": "./variables.sh public && react-scripts build",
-    "win-start": "bash ./variables.sh public && react-scripts start",
-    "win-build": "bash ./variables.sh public && react-scripts build",
+    "dev": "./variables.sh public && vite",
+    "start": "./variables.sh public && vite",
+    "build": "./variables.sh public && vite build",
+    "preview": "vite preview",
+    "win-start": "bash ./variables.sh public && vite",
+    "win-build": "bash ./variables.sh public && vite build",
     "lint": "eslint src/**/*.{js,jsx,ts,tsx}",
     "lint:fix": "eslint src/**/*.{js,jsx,ts,tsx} --fix",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,md}\"",
     "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,json,css,md}\"",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "test": "vitest",
+    "test:ui": "vitest --ui"
   },
   "browserslist": {
     "production": [
@@ -48,10 +48,14 @@
     "@babel/preset-react": "^7.27.1",
     "@babel/preset-typescript": "^7.27.1",
     "@babel/runtime": "^7.28.3",
+    "@testing-library/jest-dom": "6.8.0",
+    "@types/node": "24.3.0",
     "@types/react": "19.1.11",
     "@types/react-dom": "19.1.8",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
+    "@vitejs/plugin-react": "5.0.2",
+    "@vitest/ui": "3.2.4",
     "eslint": "^8.57.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "10.1.8",
@@ -60,8 +64,12 @@
     "eslint-plugin-prettier": "5.5.4",
     "eslint-plugin-react": "^7.34.0",
     "eslint-plugin-react-hooks": "^4.6.0",
+    "jsdom": "26.1.0",
     "prettier": "3.6.2",
     "typescript": "4.9.5",
-    "typescript-eslint": "^8.41.0"
+    "typescript-eslint": "^8.41.0",
+    "vite": "7.1.4",
+    "vitest": "3.2.4",
+    "wait-on": "8.0.4"
   }
 }
