@@ -8,11 +8,15 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 
 # Install dependencies with npm ci for faster, reproducible builds
-# Note: npm should be upgraded to latest (>=11.5.0) for optimal performance
-RUN npm ci --silent
+# Configure npm to handle potential SSL issues in CI environments
+RUN npm config set strict-ssl false && \
+    npm ci --silent && \
+    npm config delete strict-ssl
 
-# Copy source code and build
+# Copy source code and configuration files
 COPY . ./
+
+# Build the application using Vite
 RUN ./scripts/build.sh
 
 # Production stage - smaller final image with only runtime dependencies
@@ -21,7 +25,6 @@ FROM node:20-alpine AS production
 WORKDIR /app
 
 # Install serve for production serving
-# Note: In production, upgrade npm first: RUN npm install -g npm@latest serve
 RUN npm install -g serve
 
 # Set environment variable using modern format

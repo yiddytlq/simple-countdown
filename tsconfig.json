@@ -18,7 +18,11 @@
         "isolatedModules": true,
         "noEmit": true,
         "jsx": "react-jsx",
-        "typeRoots": ["node_modules/@types", "src/types"]
+        "typeRoots": [
+            "node_modules/@types",
+            "src/types"
+        ],
+        "types": ["node"]
     },
     "include": [
         "src"
@@ -26,5 +30,8 @@
     "exclude": [
         "node_modules",
         "build"
+    ],
+    "reference": [
+        "./tsconfig.node.json"
     ]
 }

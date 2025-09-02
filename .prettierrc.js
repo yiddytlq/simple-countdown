@@ -1,6 +1,6 @@
 module.exports = {
   singleQuote: true,
-  trailingComma: 'es5',
+  trailingComma: 'none',
   tabWidth: 2,
   semi: true,
   printWidth: 80,
@@ -11,5 +11,5 @@ module.exports = {
   arrowParens: 'avoid',
   endOfLine: 'lf',
   embeddedLanguageFormatting: 'auto',
-  singleAttributePerLine: false,
+  singleAttributePerLine: false
 };
