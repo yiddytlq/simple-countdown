@@ -10,9 +10,7 @@ interface BlockProps {
 
 function Block({ className = '', value, title }: BlockProps) {
   return (
-    <div
-      className={cl(
-        'flex h-44 w-60 flex-col items-center justify-center rounded-md bg-[rgba(211,211,211,0.349)] p-12 shadow-[0px_5px_33px_-13px_rgba(0,0,0,0.5)]',
+        'flex h-44 w-60 flex-col items-center justify-center rounded-md bg-gray-200/35 p-12 shadow-lg',
         className
       )}
     >
