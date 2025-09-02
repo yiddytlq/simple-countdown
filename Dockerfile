@@ -25,10 +25,7 @@ FROM node:20-alpine AS production
 WORKDIR /app
 
 # Install serve for production serving
-# Configure npm to handle potential SSL issues in CI environments
-RUN npm config set strict-ssl false && \
-    npm install -g serve && \
-    npm config delete strict-ssl
+RUN npm install -g serve
 
 # Set environment variable using modern format
 ARG ENVIRONMENT
