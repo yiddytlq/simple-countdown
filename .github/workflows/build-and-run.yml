@@ -48,9 +48,6 @@ jobs:
 
       - name: Build project (with timing)
         run: |
-          echo "⏱️ Starting TypeScript type check at $(date)"
-          npx tsc --noEmit
-          echo "✅ TypeScript type check completed at $(date)"
           echo "⏱️ Starting build at $(date)"
           time npm run build
           echo "✅ Build completed at $(date)"

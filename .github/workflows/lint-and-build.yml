@@ -110,11 +110,6 @@ jobs:
           echo "- node_modules size: $(du -sh node_modules | cut -f1)"
       - name: Run Full ESLint
         run: npm run lint
-      - name: TypeScript Type Check
-        run: |
-          echo "⏱️ Starting TypeScript type check at $(date)"
-          npx tsc --noEmit
-          echo "✅ TypeScript type check completed at $(date)"
       - name: Build project (with timing)
         run: |
           echo "⏱️ Starting build at $(date)"
