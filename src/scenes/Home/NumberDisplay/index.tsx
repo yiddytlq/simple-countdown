@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import s from './index.module.css';
 
 interface NumberDisplayProps {
   value: number;
@@ -17,13 +16,17 @@ function NumberDisplay({ value: v }: NumberDisplayProps) {
   const value = fd ? Math.floor(Math.random() * 11) : v;
 
   return (
-    <div className={s.value}>
+    <div className="relative h-[100px] w-[70px] overflow-hidden text-[100px]">
       <div
-        className={s.numbercontainer}
+        className="relative h-full w-full transition-all duration-[800ms]"
         style={{ transform: `translateY(-${value * 100}px)` }}
       >
         {ten.map(t => (
-          <div className={s.number} style={{ top: `${t * 100}px` }} key={t}>
+          <div
+            className="absolute right-0 left-0 h-[50px] font-bold text-white"
+            style={{ top: `${t * 100}px` }}
+            key={t}
+          >
             {t}
           </div>
         ))}
