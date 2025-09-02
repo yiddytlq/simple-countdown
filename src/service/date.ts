@@ -19,7 +19,7 @@ const numbers: TimeUnit[] = [
   { nb: day, label: 'day' },
   { nb: hour, label: 'hour' },
   { nb: minute, label: 'minute' },
-  { nb: second, label: 'second' },
+  { nb: second, label: 'second' }
 ];
 
 export default function describe(a: Date, b: Date): TimeDescription {
