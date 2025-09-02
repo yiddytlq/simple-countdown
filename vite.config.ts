@@ -32,7 +32,7 @@ export default defineConfig({
   },
   
   // Define environment variables prefix
-  envPrefix: ['VITE_', 'TIMER_'],
+  envPrefix: ['TIMER_'],
   
   // Ensure proper handling of public assets
   publicDir: 'public',
