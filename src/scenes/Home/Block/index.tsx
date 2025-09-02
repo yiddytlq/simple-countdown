@@ -1,6 +1,5 @@
 import React from 'react';
 import cl from 'classnames';
-import s from './index.module.css';
 import NumberDisplay from '../NumberDisplay';
 
 interface BlockProps {
@@ -11,13 +10,18 @@ interface BlockProps {
 
 function Block({ className = '', value, title }: BlockProps) {
   return (
-    <div className={cl(s.root, className)}>
-      <div className={s.numbers}>
+    <div
+      className={cl(
+        'flex h-44 w-60 flex-col items-center justify-center rounded-md bg-[rgba(211,211,211,0.349)] p-12 shadow-[0px_5px_33px_-13px_rgba(0,0,0,0.5)]',
+        className
+      )}
+    >
+      <div className="flex min-h-24 items-center justify-center">
         {value.split('').map((v, k) => (
           <NumberDisplay value={+v} key={k} />
         ))}
       </div>
-      <div className={s.title}>{title}</div>
+      <div className="text-3xl text-white">{title}</div>
     </div>
   );
 }
