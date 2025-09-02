@@ -16,7 +16,7 @@ export function describe(a, b) {
 
   for (let i = 0; i < numbers.length; i += 1) {
     const field = numbers[i].label;
-    const nb = numbers[i].nb;
+    const { nb } = numbers[i];
 
     result[field] = Math.floor(ms / nb);
     ms -= result[field] * nb;

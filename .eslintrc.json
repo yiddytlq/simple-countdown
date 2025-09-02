@@ -24,5 +24,12 @@
         "@typescript-eslint"
     ],
     "rules": {
+        "react/jsx-filename-extension": "off",
+        "react/prop-types": "off",
+        "react/no-array-index-key": "off",
+        "import/prefer-default-export": "off",
+        "no-use-before-define": "off",
+        "no-param-reassign": "off",
+        "no-console": "off"
     }
 }
