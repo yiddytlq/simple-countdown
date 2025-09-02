@@ -35,16 +35,14 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             // Determine if the event is a PR review or PR closed
-            let issueNumber;
-            let eventType = context.eventName;
-
+            const eventType = context.eventName;
             const statusLabels = ["status:in-review", "status:changes-needed", "status:ready-to-merge", "status:done", "status:approval-needed", "status:info-needed", "done:feature-branch"];
-            const labelsToAdd = [];
-            const labelsToRemove = [];
 
             if (eventType === "pull_request_review") {
-              issueNumber = context.payload.pull_request.number;
+              const issueNumber = context.payload.pull_request.number;
               const state = context.payload.review.state; // approved, changes_requested, commented
+              const labelsToAdd = [];
+              const labelsToRemove = [];
 
               // Decide which status to add
               if (state === "approved") {
@@ -58,49 +56,8 @@ jobs:
               if (state === "commented") {
                 labelsToAdd.push("status:info-needed");
               }
-            }
 
-            if (eventType === "pull_request_target") {
-              if (context.payload.pull_request.merged) {
-                const targetBranch = context.payload.pull_request.base.ref;
-
-                // Extract linked issue number from PR title, body, or commits
-                const prTitle = context.payload.pull_request.title || '';
-                const prBody = context.payload.pull_request.body || '';
-
-                // Look for patterns like "Fixes #123", "Closes #456", etc.
-                const issuePattern =
-                  /(?:fix(?:es|ed)?|close(?:s|d)?|resolve(?:s|d)?)\s*#(\d+)/i;
-                let linkedIssueMatch = prTitle.match(issuePattern) ||
-                  prBody.match(issuePattern);
-
-                if (linkedIssueMatch) {
-                  issueNumber = parseInt(linkedIssueMatch[1]);
-
-                  if (targetBranch === 'master') {
-                    // When merged into master, set status:done and remove
-                    // done:feature-branch
-                    labelsToAdd.push("status:done");
-                    labelsToRemove.push(...statusLabels.filter(l =>
-                      l !== "status:done"));
-                  } else {
-                    // When merged into non-master branch, add
-                    // done:feature-branch
-                    labelsToAdd.push("done:feature-branch");
-                    labelsToRemove.push("status:in-review",
-                      "status:changes-needed", "status:approval-needed",
-                      "status:info-needed");
-                  }
-                }
-              }
-            }
-
-            if (eventType === "issues" && context.payload.action === "labeled") {
-              // Optionally handle manual label updates if needed
-              return;
-            }
-
-            if (issueNumber) {
+              // Apply labels to the PR (treated as an issue)
               // Remove old status labels
               for (const label of labelsToRemove) {
                 await github.rest.issues.removeLabel({
@@ -120,4 +77,78 @@ jobs:
                   labels: labelsToAdd
                 });
               }
+            }
+
+            if (eventType === "pull_request_target") {
+              if (context.payload.pull_request.merged) {
+                const targetBranch = context.payload.pull_request.base.ref;
+
+                // Extract linked issue numbers from PR title and body
+                const prTitle = context.payload.pull_request.title || '';
+                const prBody = context.payload.pull_request.body || '';
+                const combinedText = prTitle + '\n' + prBody;
+
+                // Look for patterns like "Fixes #123", "Closes #456", etc.
+                // Use global flag to find ALL matches
+                const issuePattern =
+                  /(?:fix(?:es|ed)?|close(?:s|d)?|resolve(?:s|d)?)\s*#(\d+)/gi;
+                
+                // Find all issue references in title and body
+                const linkedIssueMatches = Array.from(combinedText.matchAll(issuePattern));
+
+                console.log(`Found ${linkedIssueMatches.length} linked issues in merged PR #${context.payload.pull_request.number}`);
+
+                // Process each linked issue
+                for (const match of linkedIssueMatches) {
+                  const issueNumber = parseInt(match[1]);
+                  const issueLabelsToAdd = [];
+                  const issueLabelsToRemove = [];
+
+                  console.log(`Processing issue #${issueNumber} for target branch: ${targetBranch}`);
+
+                  if (targetBranch === 'master') {
+                    // When merged into master, set status:done and remove
+                    // done:feature-branch
+                    issueLabelsToAdd.push("status:done");
+                    issueLabelsToRemove.push(...statusLabels.filter(l =>
+                      l !== "status:done"));
+                  } else {
+                    // When merged into non-master branch, add
+                    // done:feature-branch
+                    issueLabelsToAdd.push("done:feature-branch");
+                    issueLabelsToRemove.push("status:in-review",
+                      "status:changes-needed", "status:approval-needed",
+                      "status:info-needed");
+                  }
+
+                  // Apply labels to this specific issue
+                  // Remove old status labels
+                  for (const label of issueLabelsToRemove) {
+                    await github.rest.issues.removeLabel({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      issue_number: issueNumber,
+                      name: label
+                    }).catch(() => {
+                      console.log(`Could not remove label ${label} from issue #${issueNumber} (likely not present)`);
+                    });
+                  }
+
+                  // Add new status labels
+                  if (issueLabelsToAdd.length > 0) {
+                    await github.rest.issues.addLabels({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      issue_number: issueNumber,
+                      labels: issueLabelsToAdd
+                    });
+                    console.log(`Added labels [${issueLabelsToAdd.join(', ')}] to issue #${issueNumber}`);
+                  }
+                }
+              }
+            }
+
+            if (eventType === "issues" && context.payload.action === "labeled") {
+              // Optionally handle manual label updates if needed
+              return;
             }
