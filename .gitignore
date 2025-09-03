@@ -28,4 +28,14 @@ yarn-error.log*
 
 public/variables-final.js
 
+# Development artifacts (prevent future accidental commits)
+TODO.md
+*PROGRESS*.md
+*MODERNIZATION*.md
+issues.json
+export-issues.js
+*.temp
+*.tmp
+*.bak
+
 .npm-cache
