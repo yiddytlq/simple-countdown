@@ -38,4 +38,9 @@ export-issues.js
 *.tmp
 *.bak
 
+# Development-only files (kept in development branch)
+.env
+Dockerfile.remote-test
+.babelrc
+
 .npm-cache
