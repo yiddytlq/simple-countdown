@@ -13,6 +13,12 @@ updates:
     directory: '/'
     schedule:
       interval: 'weekly'
+    ignore:
+      # We deliberately track Node LTS only. Dependabot can't tell LTS from
+      # current, so major bumps are reviewed and applied manually once a new
+      # major goes Active LTS (see https://nodejs.org/en/about/previous-releases).
+      - dependency-name: 'node'
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: 'github-actions'
     directory: '/'
