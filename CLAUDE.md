@@ -62,7 +62,7 @@ Published releases trigger `docker-publish.yml`, pushing `yiddy/simple-countdown
 
 ## Docker
 
-- Multi-stage `Dockerfile`: `base` (node:22-alpine, deps + source) → `build` (`pnpm build`) → runtime
+- Multi-stage `Dockerfile`: `base` (node:24-alpine, deps + source) → `build` (`pnpm build`) → runtime
   (nginx:alpine-slim serving `build/` on :3000 — no node or node_modules in the final image, keeping it
   small and CVE-free).
 - `docker-compose.dev.yml` targets the `base` stage (`build.target: base`) and runs `pnpm dev -- --host`
