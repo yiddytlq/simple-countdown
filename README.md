@@ -1,16 +1,16 @@
-![Client CI](https://github.com/Yooooomi/easy-countdown/workflows/Client%20CI/badge.svg)
+[![CI](https://github.com/yiddytlq/simple-countdown/actions/workflows/ci.yml/badge.svg)](https://github.com/yiddytlq/simple-countdown/actions/workflows/ci.yml)
 
 ![gif](https://user-images.githubusercontent.com/17204739/88205741-825e7d00-cc4d-11ea-81c3-92e42d197346.gif)
 
-# Easy countdown
+# Simple countdown
 
-Easy countdown is an easy to setup countdown page. Can be setup as a countdown or as a timer
+Simple countdown is an easy to setup countdown page. Can be setup as a countdown or as a timer.
 
 # Setup
 
 ## Using docker (Recommended)
 
-If you use docker, just edit the `docker-compose.yml` file so that it fits your needs
+If you use docker, just edit the `docker-compose.yml` file so that it fits your needs.
 
 | Variables        | Definition                                                                                                  | Example                                              |
 | ---------------- | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
@@ -18,38 +18,53 @@ If you use docker, just edit the `docker-compose.yml` file so that it fits your 
 | TIMER_TARGET     | The target date of the countdown, if date is in the future, timer will decrease, otherwise it will increase | Fri Oct 01 2021 15:33:36 GMT+0200                    |
 | TIMER_TITLE      | The title of the countdown, can be empty                                                                    | My title!                                            |
 
+Variables are injected at **container start**, so one prebuilt image can be configured per deployment.
+
 ### Example of `docker-compose.yml` file
 
-> This example is a copy-paste of `docker-compose.production.yml` in the repo
-
 ```yml
-version: "3.8"
-
 services:
   web:
-    stdin_open: true # So that the serving is not exited with code 0
-    image: yooooomi/easy-countdown
+    image: yiddy/simple-countdown
     environment:
       TIMER_BACKGROUND: https://wallpaperplay.com/walls/full/0/7/6/29912.jpg
-      TIMER_TARGET: "Fri Oct 01 2021 15:33:36 GMT+0200" # Get help with https://esqsoft.com/javascript_examples/date-to-epoch.htm
-      TIMER_TITLE: "My next birthday" # Can be empty
+      TIMER_TARGET: 'Fri Oct 01 2021 15:33:36 GMT+0200' # Get help with https://esqsoft.com/javascript_examples/date-to-epoch.htm
+      TIMER_TITLE: 'My next birthday' # Can be empty
     ports:
-      - "3000:3000"
+      - '3000:3000'
 ```
+
+Release images are tagged with their semantic version (e.g. `yiddy/simple-countdown:1.2.3`) as well as `latest`.
 
 ## Without docker
 
-> This method builds the project following the env variables you gave, producing a `build` folder that has to be served manually afterwards. You can use [`serve`](https://www.npmjs.com/package/serve) to achieve it
+> This method builds the project with the env variables you provide, producing a `build` folder that has to be served manually afterwards.
 
-Use `yarn` to use the build script from the
-`package.json`. Simply use `yarn build`. Use the variables above in the env to personalize your countdown
+This project uses [pnpm](https://pnpm.io) exclusively — do not use npm or yarn.
 
-- `npm install`
-- `TIMER_TITLE="example" yarn build`
+```sh
+pnpm install
+TIMER_TARGET="Fri Oct 01 2021 15:33:36 GMT+0200" TIMER_TITLE="example" pnpm build
+pnpm dlx serve -s -l tcp://0.0.0.0:3000 build/
+```
 
-> Variables will be taken from env, and are the same as above
+> Variables are taken from the env and are the same as the table above.
 
-I.E: `TIMER_TARGET="Fri Oct 01 2021 15:33:36 GMT+0200" yarn build && serve -s -l tcp://0.0.0.0:3000 build/`
+# Development
+
+```sh
+pnpm install        # install dependencies (pnpm only)
+pnpm dev            # start the Vite dev server on :3000
+pnpm test           # run unit tests (Vitest)
+pnpm lint           # ESLint (strict TypeScript, no `any`)
+pnpm format:check   # Prettier check
+pnpm typecheck      # tsc --noEmit
+```
+
+CI enforces all of the above plus a dependency audit (fails on high/critical CVEs), secret scanning
+(gitleaks), and CodeQL. Versioning is automated with semantic-release from conventional commit
+messages (`feat:` → minor, `fix:` → patch, `BREAKING CHANGE` → major) — never bump the version by hand.
+See `CLAUDE.md` for the full contributor conventions.
 
 ## Credits
 

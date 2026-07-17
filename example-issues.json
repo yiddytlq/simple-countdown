@@ -4,10 +4,7 @@
     "title": "Main feature implementation",
     "state": "open",
     "author": "alice",
-    "labels": [
-      "feature",
-      "priority-high"
-    ],
+    "labels": ["feature", "priority-high"],
     "body": "This is the main issue for implementing the new feature.\n\nSub-issues: #124, #125",
     "created_at": "2025-08-20T12:34:56Z",
     "comments": [
@@ -30,10 +27,7 @@
         "title": "Sub-task: Frontend implementation",
         "state": "open",
         "author": "bob",
-        "labels": [
-          "frontend",
-          "feature"
-        ],
+        "labels": ["frontend", "feature"],
         "body": "Sub-issue of #123\n\nImplement the frontend components.",
         "created_at": "2025-08-22T12:34:56Z",
         "comments": [
@@ -50,9 +44,7 @@
             "title": "Nested sub-task",
             "state": "open",
             "author": "alice",
-            "labels": [
-              "subtask"
-            ],
+            "labels": ["subtask"],
             "body": "Child of #124\n\nThis is a nested sub-task.",
             "created_at": "2025-08-25T12:34:56Z",
             "comments": [
@@ -72,10 +64,7 @@
         "title": "Sub-task: Backend API",
         "state": "closed",
         "author": "charlie",
-        "labels": [
-          "backend",
-          "feature"
-        ],
+        "labels": ["backend", "feature"],
         "body": "Part of #123\n\nImplement the backend API endpoints.",
         "created_at": "2025-08-22T13:45:20Z",
         "comments": [
@@ -95,9 +84,7 @@
     "title": "Independent issue",
     "state": "open",
     "author": "dave",
-    "labels": [
-      "bug"
-    ],
+    "labels": ["bug"],
     "body": "This is an independent issue with no relationships.",
     "created_at": "2025-08-26T08:15:30Z",
     "comments": [],

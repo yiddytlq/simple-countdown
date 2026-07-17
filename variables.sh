@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 cp $1/variables.js $1/variables-final.js
 

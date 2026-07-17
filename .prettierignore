@@ -1,0 +1,5 @@
+build/
+coverage/
+pnpm-lock.yaml
+public/variables-final.js
+.github/artifacts/

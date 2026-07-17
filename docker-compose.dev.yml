@@ -1,11 +1,8 @@
-version: "3.8"
-
 services:
   web:
     build:
-      args:
-        ENVIRONMENT: "DEV"
-    command: yarn start
+      target: base
+    command: pnpm dev -- --host
     volumes:
-      - "./src/:/app/src/"
-      - "./public/:/app/public/"
+      - './src/:/app/src/'
+      - './public/:/app/public/'
