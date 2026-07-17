@@ -4,14 +4,13 @@ on:
   push:
     branches:
       - master
-      - main
   pull_request:
     types: [reopened, closed]
   workflow_run:
     workflows:
       - Docker Build & Publish
-      - Lint & Build Checks
-      - CI - CodeQL Scan
+      - CI
+      - CodeQL Advanced
     types: [completed]
   issues:
     types: [opened, edited, closed, reopened]
@@ -19,12 +18,7 @@ on:
     types: [created]
 
 jobs:
-  pre-check:
-    uses: ./.github/workflows/skip-copilot.yml
-    
   notify:
-    needs: pre-check
-    if: needs.pre-check.outputs.skip != 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Determine if workflow should notify
@@ -34,9 +28,9 @@ jobs:
             echo "should_notify=false" >> $GITHUB_OUTPUT
             exit 0
           elif [[ "${{ github.event_name }}" == "workflow_run" ]]; then
-            if [[ "${{ github.event.workflow_run.name }}" == "CI - CodeQL Scan" && "${{ github.event.workflow_run.conclusion }}" == "success" ]]; then
+            if [[ "${{ github.event.workflow_run.name }}" == "CodeQL Advanced" && "${{ github.event.workflow_run.conclusion }}" == "success" ]]; then
               echo "should_notify=false" >> $GITHUB_OUTPUT
-            elif [[ "${{ github.event.workflow_run.name }}" == "Lint & Build Checks" && "${{ github.event.workflow_run.conclusion }}" == "success" ]]; then
+            elif [[ "${{ github.event.workflow_run.name }}" == "CI" && "${{ github.event.workflow_run.conclusion }}" == "success" ]]; then
               echo "should_notify=false" >> $GITHUB_OUTPUT
             else
               echo "should_notify=true" >> $GITHUB_OUTPUT

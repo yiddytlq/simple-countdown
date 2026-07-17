@@ -1,13 +1,13 @@
 # This file maps paths or patterns to labels
 bug:
-  - "bug*"
-  - "**/*.test.*"
+  - 'bug*'
+  - '**/*.test.*'
 feature:
-  - "feature*"
+  - 'feature*'
 enhancement:
-  - "enhancement*"
+  - 'enhancement*'
 documentation:
-  - "docs/**"
-  - "**/*.md"
+  - 'docs/**'
+  - '**/*.md'
 question:
-  - "question*"
+  - 'question*'

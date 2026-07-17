@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/* eslint-disable no-console */
 
 /**
  * Export GitHub repository issues and sub-issues to JSON using gh-sub-issue extension
@@ -64,7 +63,8 @@ class IssueExporter {
   static fetchAllIssues() {
     console.log('Fetching all issues...');
 
-    const command = 'gh issue list --state all --json number,title,state,author,labels,body,createdAt,updatedAt --limit 1000';
+    const command =
+      'gh issue list --state all --json number,title,state,author,labels,body,createdAt,updatedAt --limit 1000';
     const issues = IssueExporter.executeGhCommand(command);
 
     console.log(`Found ${issues.length} issues`);
@@ -99,9 +99,7 @@ class IssueExporter {
 
       return comments;
     } catch (error) {
-      console.warn(
-        `Could not fetch comments for issue #${issueNumber}: ${error.message}`,
-      );
+      console.warn(`Could not fetch comments for issue #${issueNumber}: ${error.message}`);
       return [];
     }
   }
@@ -160,13 +158,13 @@ class IssueExporter {
     const issueMap = new Map();
 
     // First pass: create all issue objects
-    // eslint-disable-next-line no-restricted-syntax
+
     for (const [id, issue] of this.issues) {
       issueMap.set(id, { ...issue, sub_issues: [] });
     }
 
     // Second pass: build relationships
-    // eslint-disable-next-line no-restricted-syntax
+
     for (const [childId, parentId] of this.issueRelationships) {
       const childIssue = issueMap.get(childId);
       const parentIssue = issueMap.get(parentId);
@@ -177,7 +175,7 @@ class IssueExporter {
     }
 
     // Third pass: collect root issues (those without parents)
-    // eslint-disable-next-line no-restricted-syntax
+
     for (const [id, issue] of issueMap) {
       if (!this.issueRelationships.has(id)) {
         rootIssues.push(issue);
@@ -203,13 +201,10 @@ class IssueExporter {
     // (HIGHEST PRIORITY)
     const epicPattern = /_?Epic:\s*#(\d+)_?/gi;
     const epicMatches = allText.matchAll(epicPattern);
-    // eslint-disable-next-line no-restricted-syntax
+
     for (const match of epicMatches) {
       const parentId = parseInt(match[1], 10);
-      if (
-        parentId !== issue.number
-        && !this.issueRelationships.has(issue.number)
-      ) {
+      if (parentId !== issue.number && !this.issueRelationships.has(issue.number)) {
         this.issueRelationships.set(issue.number, parentId);
         console.log(
           `Found relationship: #${issue.number} is child of #${parentId} (Epic reference)`,
@@ -219,15 +214,13 @@ class IssueExporter {
     }
 
     // Patterns for "Research in #X" type references (MEDIUM PRIORITY)
-    const contextualPattern = /(?:research|installation|pipeline|task|sub-?task|work|part)\s+in\s+#(\d+)/gi;
+    const contextualPattern =
+      /(?:research|installation|pipeline|task|sub-?task|work|part)\s+in\s+#(\d+)/gi;
     const contextualMatches = allText.matchAll(contextualPattern);
-    // eslint-disable-next-line no-restricted-syntax
+
     for (const match of contextualMatches) {
       const parentId = parseInt(match[1], 10);
-      if (
-        parentId !== issue.number
-        && !this.issueRelationships.has(issue.number)
-      ) {
+      if (parentId !== issue.number && !this.issueRelationships.has(issue.number)) {
         this.issueRelationships.set(issue.number, parentId);
         console.log(
           `Found relationship: #${issue.number} is child of #${parentId} (contextual reference)`,
@@ -237,9 +230,7 @@ class IssueExporter {
     }
 
     // Find Related Issues section and parse it properly (LOWER PRIORITY)
-    const relatedSectionMatch = allText.match(
-      /### Related Issues\s*([\s\S]*?)(?=###|$)/,
-    );
+    const relatedSectionMatch = allText.match(/### Related Issues\s*([\s\S]*?)(?=###|$)/);
     if (relatedSectionMatch) {
       const relatedContent = relatedSectionMatch[1];
 
@@ -250,13 +241,10 @@ class IssueExporter {
       if (isEpic) {
         // Look for list items like "- #2", "- #3", "- #25" and make them children of this epic
         const listItemMatches = relatedContent.matchAll(/[-*]\s*#(\d+)/g);
-        // eslint-disable-next-line no-restricted-syntax
+
         for (const match of listItemMatches) {
           const childId = parseInt(match[1], 10);
-          if (
-            childId !== issue.number
-            && !this.issueRelationships.has(childId)
-          ) {
+          if (childId !== issue.number && !this.issueRelationships.has(childId)) {
             this.issueRelationships.set(childId, issue.number);
             console.log(
               `Found relationship: #${childId} is child of #${issue.number} (Epic child list)`,
@@ -267,13 +255,10 @@ class IssueExporter {
         // For non-epic issues, look for the first parent reference
         // Look for list items like "- #2", "- #3", "- #25"
         const listItemMatches = relatedContent.matchAll(/[-*]\s*#(\d+)/g);
-        // eslint-disable-next-line no-restricted-syntax
+
         for (const match of listItemMatches) {
           const parentId = parseInt(match[1], 10);
-          if (
-            parentId !== issue.number
-            && !this.issueRelationships.has(issue.number)
-          ) {
+          if (parentId !== issue.number && !this.issueRelationships.has(issue.number)) {
             this.issueRelationships.set(issue.number, parentId);
             console.log(
               `Found relationship: #${issue.number} is child of #${parentId} (Related Issues list)`,
@@ -283,16 +268,11 @@ class IssueExporter {
         }
 
         // Look for single issue references in related issues section
-        const singleRefMatches = relatedContent.matchAll(
-          /(?:^|\s)#(\d+)(?=\s|$)/g,
-        );
-        // eslint-disable-next-line no-restricted-syntax
+        const singleRefMatches = relatedContent.matchAll(/(?:^|\s)#(\d+)(?=\s|$)/g);
+
         for (const match of singleRefMatches) {
           const parentId = parseInt(match[1], 10);
-          if (
-            parentId !== issue.number
-            && !this.issueRelationships.has(issue.number)
-          ) {
+          if (parentId !== issue.number && !this.issueRelationships.has(issue.number)) {
             this.issueRelationships.set(issue.number, parentId);
             console.log(
               `Found relationship: #${issue.number} is child of #${parentId} (Related Issues reference)`,
@@ -312,16 +292,12 @@ class IssueExporter {
       /subtask of #(\d+)/gi,
     ];
 
-    // eslint-disable-next-line no-restricted-syntax
     for (const pattern of relationshipPatterns) {
       const matches = allText.matchAll(pattern);
-      // eslint-disable-next-line no-restricted-syntax
+
       for (const match of matches) {
         const parentId = parseInt(match[1], 10);
-        if (
-          parentId !== issue.number
-          && !this.issueRelationships.has(issue.number)
-        ) {
+        if (parentId !== issue.number && !this.issueRelationships.has(issue.number)) {
           this.issueRelationships.set(issue.number, parentId);
           console.log(
             `Found relationship: #${issue.number} is child of #${parentId} (traditional pattern)`,
@@ -346,9 +322,7 @@ class IssueExporter {
           env: { ...process.env, GH_TOKEN: process.env.GITHUB_TOKEN },
         });
       } catch (error) {
-        throw new Error(
-          'GitHub CLI is not authenticated. Please run "gh auth login" first.',
-        );
+        throw new Error('GitHub CLI is not authenticated. Please run "gh auth login" first.');
       }
 
       // Check if gh-sub-issue extension is available
@@ -356,33 +330,24 @@ class IssueExporter {
       if (hasSubIssueExtension) {
         console.log('✓ gh-sub-issue extension detected');
       } else {
-        console.log(
-          '⚠ gh-sub-issue extension not available, using fallback text parsing',
-        );
-        console.log(
-          '  Install with: gh extension install yahsan2/gh-sub-issue',
-        );
+        console.log('⚠ gh-sub-issue extension not available, using fallback text parsing');
+        console.log('  Install with: gh extension install yahsan2/gh-sub-issue');
       }
 
       // Fetch all issues
       const rawIssues = IssueExporter.fetchAllIssues();
 
       // Process each issue
-      // eslint-disable-next-line no-restricted-syntax
+
       for (const rawIssue of rawIssues) {
         console.log(`Processing issue #${rawIssue.number}: ${rawIssue.title}`);
 
         // Fetch comments for this issue
-        // eslint-disable-next-line no-await-in-loop
-        const comments = await IssueExporter.fetchIssueComments(
-          rawIssue.number,
-        );
+
+        const comments = await IssueExporter.fetchIssueComments(rawIssue.number);
 
         // Transform to our format
-        const transformedIssue = IssueExporter.transformIssueData(
-          rawIssue,
-          comments,
-        );
+        const transformedIssue = IssueExporter.transformIssueData(rawIssue, comments);
 
         // Store the issue
         this.issues.set(rawIssue.number, transformedIssue);
@@ -390,7 +355,6 @@ class IssueExporter {
         if (hasSubIssueExtension) {
           // Use gh-sub-issue extension to get relationships
           try {
-            // eslint-disable-next-line no-await-in-loop
             const result = await IssueExporter.fetchSubIssues(rawIssue.number);
 
             // The gh sub-issue list command returns:
@@ -419,9 +383,7 @@ class IssueExporter {
               });
             }
           } catch (error) {
-            console.warn(
-              `Could not fetch sub-issues for #${rawIssue.number}: ${error.message}`,
-            );
+            console.warn(`Could not fetch sub-issues for #${rawIssue.number}: ${error.message}`);
           }
         } else {
           // Fallback to text parsing

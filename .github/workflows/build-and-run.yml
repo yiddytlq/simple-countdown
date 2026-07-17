@@ -6,32 +6,36 @@ on:
       branch:
         description: 'Branch to run the check on'
         required: true
-        default: 'main'
+        default: 'master'
 
 jobs:
   run-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.branch }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
+          cache: pnpm
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install --frozen-lockfile
 
       - name: Build project
-        run: npm run build
+        env:
+          TIMER_BACKGROUND: ''
+          TIMER_TARGET: '2030-01-01'
+          TIMER_TITLE: 'Smoke test'
+        run: pnpm build
 
-      - name: Start app in background
-        run: nohup npm start &
+      - name: Serve build in background
+        run: pnpm dlx serve -s build -l 3000 &
 
       - name: Wait for app to start
-        run: npx wait-on http://localhost:3000
+        run: pnpm dlx wait-on http://localhost:3000
 
       - name: Verify app is running
         run: curl -I http://localhost:3000

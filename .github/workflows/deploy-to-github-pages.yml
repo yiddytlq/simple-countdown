@@ -6,7 +6,7 @@ on:
       branch:
         description: 'Branch to deploy from'
         required: true
-        default: 'main'
+        default: 'master'
 
 permissions:
   contents: read
@@ -17,22 +17,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.branch }}
-      - uses: actions/setup-node@v3
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18
-      - run: npm install
-      - name: Set variables and build
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build with timer variables
         env:
           TIMER_BACKGROUND: ${{ secrets.TIMER_BACKGROUND }}
           TIMER_TARGET: ${{ secrets.TIMER_TARGET }}
           TIMER_TITLE: ${{ secrets.TIMER_TITLE }}
-          PUBLIC_URL: https://yiddytlq.github.io/simple-countdown
-        run: |
-          ./variables.sh public
-          npm run build
+        run: pnpm build
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./build

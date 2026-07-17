@@ -1,4 +1,8 @@
 node_modules
+build
+coverage
+.git
+.github
 docker-compose.*
 .gitignore
 README.md

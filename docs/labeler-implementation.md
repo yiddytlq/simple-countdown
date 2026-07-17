@@ -12,7 +12,9 @@ The labeler workflow now automatically manages issue labels based on which branc
 ## Key Changes Made
 
 ### 1. Simplified Event Triggers
+
 **Before:**
+
 ```yaml
 on:
   status:
@@ -21,6 +23,7 @@ on:
 ```
 
 **After:**
+
 ```yaml
 on:
   pull_request_target:
@@ -30,29 +33,34 @@ on:
 **Why:** Removed resource-intensive `status:` and `check_suite:` events that caused performance issues in the previous implementation.
 
 ### 2. Issue-Based Labeling Logic
+
 ```javascript
-if (eventType === "pull_request_target") {
+if (eventType === 'pull_request_target') {
   if (context.payload.pull_request.merged) {
     const targetBranch = context.payload.pull_request.base.ref;
-    
+
     // Extract linked issue number from PR title or body
     const prTitle = context.payload.pull_request.title || '';
     const prBody = context.payload.pull_request.body || '';
     const issuePattern = /(?:fix(?:es|ed)?|close(?:s|d)?|resolve(?:s|d)?)\s*#(\d+)/i;
     let linkedIssueMatch = prTitle.match(issuePattern) || prBody.match(issuePattern);
-    
+
     if (linkedIssueMatch) {
       issueNumber = parseInt(linkedIssueMatch[1]); // Label the ISSUE, not the PR
-      
+
       if (targetBranch === 'master') {
         // Master merge: status:done
-        labelsToAdd.push("status:done");
-        labelsToRemove.push(...statusLabels.filter(l => l !== "status:done"));
+        labelsToAdd.push('status:done');
+        labelsToRemove.push(...statusLabels.filter((l) => l !== 'status:done'));
       } else {
         // Non-master merge: done:feature-branch
-        labelsToAdd.push("done:feature-branch");
-        labelsToRemove.push("status:in-review", "status:changes-needed", 
-          "status:approval-needed", "status:info-needed");
+        labelsToAdd.push('done:feature-branch');
+        labelsToRemove.push(
+          'status:in-review',
+          'status:changes-needed',
+          'status:approval-needed',
+          'status:info-needed',
+        );
       }
     }
   }
@@ -64,13 +72,15 @@ if (eventType === "pull_request_target") {
 ## Usage Examples
 
 ### Scenario 1: Feature Branch Testing
+
 1. Create PR from `fix-bug-123` → `test-for-99`
 2. Merge the PR
 3. **Result:** Issue gets `done:feature-branch` label
 
 ### Scenario 2: Production Release
+
 1. Create PR from `test-for-99` → `master`
-2. Merge the PR  
+2. Merge the PR
 3. **Result:** Issue gets `status:done` label, `done:feature-branch` removed
 
 ## Benefits
@@ -83,6 +93,7 @@ if (eventType === "pull_request_target") {
 ## Testing
 
 The implementation has been validated with comprehensive test cases covering:
+
 - ✅ PR merged into `test-for-99` → `done:feature-branch` added
 - ✅ PR merged into `master` → `status:done` added, `done:feature-branch` removed
 - ✅ PR merged into other feature branches → `done:feature-branch` added

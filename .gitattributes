@@ -1,0 +1,11 @@
+# Normalize all text files to LF in the repo and on checkout, on every OS.
+# Prevents CRLF/LF mismatches between Windows and Linux (CI, Docker, alpine sed).
+* text=auto eol=lf
+
+# Shell scripts must never be CRLF — it silently breaks bash/sed in alpine and CI.
+*.sh text eol=lf
+
+# Binary assets
+*.png binary
+*.ico binary
+*.jpg binary
