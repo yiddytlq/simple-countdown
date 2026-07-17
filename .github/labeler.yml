@@ -1,13 +1,20 @@
 # This file maps paths or patterns to labels
 bug:
-  - 'bug*'
-  - '**/*.test.*'
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'bug*'
+          - '**/*.test.*'
 feature:
-  - 'feature*'
+  - changed-files:
+      - any-glob-to-any-file: 'feature*'
 enhancement:
-  - 'enhancement*'
+  - changed-files:
+      - any-glob-to-any-file: 'enhancement*'
 documentation:
-  - 'docs/**'
-  - '**/*.md'
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'docs/**'
+          - '**/*.md'
 question:
-  - 'question*'
+  - changed-files:
+      - any-glob-to-any-file: 'question*'
