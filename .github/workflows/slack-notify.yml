@@ -94,7 +94,7 @@ jobs:
 
       - name: Send Slack Notification
         if: ${{ steps.decision.outputs.should_notify == 'true' }}
-        uses: slackapi/slack-github-action@v2.1.1
+        uses: slackapi/slack-github-action@v4.0.0
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
