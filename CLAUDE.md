@@ -42,6 +42,10 @@ The primary deployment target is a single Docker container configured at **runti
 
 - Default branch: `master`.
 - Conventional commits (`feat:`, `fix:`, `chore:`, …); branch naming `<type>/<short-description>` in kebab-case.
+- Cloud/CI agent sessions: the auto-created `claude/...` working branch must never be the PR branch.
+  Before opening a PR, move the work to a conventionally named branch and push that instead:
+  `git checkout -b <type>/<short-description> && git push -u origin <type>/<short-description>`.
+  A branch ruleset blocks creation of branches outside `<type>/**`, `dependabot/**`, and `claude/**`.
 - **Versioning is automated** — never bump `package.json` version by hand. semantic-release runs on every push
   to master (`.github/workflows/release.yml`): `fix:` → patch, `feat:` → minor, `BREAKING CHANGE:` → major.
   It commits the bump + CHANGELOG.md with `chore(release): x.y.z [skip ci]`, tags, and creates a GitHub Release.
