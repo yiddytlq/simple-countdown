@@ -13,10 +13,15 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
+      # RELEASE_TOKEN is a fine-grained PAT (Contents: read/write) owned by the repo admin.
+      # semantic-release pushes the version-bump commit directly to master; the default
+      # GITHUB_TOKEN cannot bypass the branch ruleset on a personal repo, but the admin's
+      # PAT is covered by the ruleset's Repository-admin bypass.
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           persist-credentials: true
+          token: ${{ secrets.RELEASE_TOKEN }}
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v7
         with:
@@ -25,5 +30,5 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Semantic release (bumps version, changelog, tag, GitHub Release)
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: pnpm exec semantic-release
