@@ -8,7 +8,7 @@ const end = resolveTarget(window.target);
 function Home() {
   const [date, setDate] = useState(new Date());
   const [announcement, setAnnouncement] = useState('');
-  const lastAnnouncedMinuteRef = useRef<number | null>(null);
+  const lastAnnouncedBucketRef = useRef<number | null>(null);
 
   useEffect(() => {
     document.title = window.title || 'Easy countdown';
@@ -27,15 +27,19 @@ function Home() {
     return describe(date, end);
   }, [date]);
 
-  // Announce once per minute, not per second — a live region updating every
-  // second is unusable with a screen reader.
+  // Announce once per minute — a live region updating every second is
+  // unusable with a screen reader — except inside the final minute, where
+  // seconds are the meaningful unit and updating every second is exactly
+  // how a human would narrate a countdown's last moments.
   useEffect(() => {
     if (end === null || described === null) {
       return;
     }
-    const minute = Math.floor(Math.abs(end.getTime() - date.getTime()) / 60000);
-    if (minute !== lastAnnouncedMinuteRef.current) {
-      lastAnnouncedMinuteRef.current = minute;
+    const remainingMs = Math.abs(end.getTime() - date.getTime());
+    const inFinalMinute = described.day === 0 && described.hour === 0 && described.minute === 0;
+    const bucket = inFinalMinute ? Math.floor(remainingMs / 1000) : Math.floor(remainingMs / 60000);
+    if (bucket !== lastAnnouncedBucketRef.current) {
+      lastAnnouncedBucketRef.current = bucket;
       setAnnouncement(formatRemaining(described));
     }
   }, [date, described]);

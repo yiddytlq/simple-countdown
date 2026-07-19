@@ -152,7 +152,7 @@ describe('Home', () => {
     expect(liveRegion).toHaveClass('sr-only');
   });
 
-  it('narrates the rollover into the final minute like a human would, not stale seconds', async () => {
+  it('narrates the rollover into the final minute like a human would, then updates every second', async () => {
     await renderHome({ target: new Date(base.getTime() + MINUTE + 30 * SECOND) });
 
     const liveRegion = screen.getByRole('timer');
@@ -169,6 +169,14 @@ describe('Home', () => {
 
     // Now inside the final minute — seconds become the meaningful unit.
     expect(liveRegion).toHaveTextContent('59 seconds remaining');
+
+    // ...and, unlike the once-a-minute cadence above, it updates every second
+    // from here on, exactly as a human counting down the last moments would.
+    tick(1000);
+    expect(liveRegion).toHaveTextContent('58 seconds remaining');
+
+    tick(1000);
+    expect(liveRegion).toHaveTextContent('57 seconds remaining');
   });
 
   it('hides the decorative digit blocks from assistive technology but not the live region', async () => {
