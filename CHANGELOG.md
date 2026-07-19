@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/yiddytlq/simple-countdown/compare/v1.1.1...v1.2.0) (2026-07-19)
+
+
+### Features
+
+* add configurable countdown completion behavior ([#154](https://github.com/yiddytlq/simple-countdown/issues/154)) ([6c314a1](https://github.com/yiddytlq/simple-countdown/commit/6c314a16684311b17520059c79d3b7f6fea72274)), closes [#16](https://github.com/yiddytlq/simple-countdown/issues/16) [#148](https://github.com/yiddytlq/simple-countdown/issues/148) [#152](https://github.com/yiddytlq/simple-countdown/issues/152)
+
 ## [1.1.1](https://github.com/yiddytlq/simple-countdown/compare/v1.1.0...v1.1.1) (2026-07-19)
 
 
