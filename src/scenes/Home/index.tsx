@@ -1,5 +1,4 @@
 import { useEffect, useState, useMemo } from 'react';
-import s from './index.module.css';
 import { describe } from '../../service/date';
 import Block from './Block';
 
@@ -23,13 +22,19 @@ function Home() {
   }, [date]);
 
   return (
-    <div className={s.root} style={{ backgroundImage: `url('${window.background}')` }}>
-      <div>
-        {window.title && window.title.length > 0 && <div className={s.title}>{window.title}</div>}
-        <div className={s.blocks}>
+    <div
+      className="flex h-dvh items-center justify-center bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: `url('${window.background}')` }}
+    >
+      <div className="flex flex-col items-center px-4">
+        {window.title && window.title.length > 0 && (
+          <div className="mb-4 text-center text-3xl text-white sm:mb-6 sm:text-4xl lg:text-5xl">
+            {window.title}
+          </div>
+        )}
+        <div className="flex flex-wrap items-start justify-center gap-3 sm:gap-4">
           {Object.entries(described).map(([key, value]) => (
             <Block
-              className={s.block}
               key={key}
               title={`${key}${value > 1 ? 's' : ''}`}
               value={value.toString().padStart(2, '0')}

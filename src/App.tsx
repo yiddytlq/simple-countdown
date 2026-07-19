@@ -1,9 +1,8 @@
-import './App.css';
 import Home from './scenes/Home';
 
 function App() {
   return (
-    <div className="App">
+    <div className="text-center">
       <Home />
     </div>
   );
