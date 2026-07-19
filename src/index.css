@@ -1,12 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&display=swap');
+@import 'tailwindcss';
 
-body {
-  margin: 0;
-  font-family: 'Balsamiq Sans';
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@theme {
+  --font-sans: 'Balsamiq Sans', ui-sans-serif, system-ui, sans-serif;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+@layer base {
+  body {
+    @apply font-sans antialiased;
+  }
 }
