@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/yiddytlq/simple-countdown/compare/v1.0.0...v1.1.0) (2026-07-19)
+
+
+### Features
+
+* migrate styling to Tailwind CSS v4 utility classes ([#150](https://github.com/yiddytlq/simple-countdown/issues/150)) ([015e7fe](https://github.com/yiddytlq/simple-countdown/commit/015e7fe5bf026358a8bc35e431fc254e5e7c3d57)), closes [#44](https://github.com/yiddytlq/simple-countdown/issues/44) [#45](https://github.com/yiddytlq/simple-countdown/issues/45) [#46](https://github.com/yiddytlq/simple-countdown/issues/46) [#47](https://github.com/yiddytlq/simple-countdown/issues/47) [#48](https://github.com/yiddytlq/simple-countdown/issues/48) [#49](https://github.com/yiddytlq/simple-countdown/issues/49) [#106](https://github.com/yiddytlq/simple-countdown/issues/106) [#107](https://github.com/yiddytlq/simple-countdown/issues/107)
+
 # 1.0.0 (2026-07-17)
 
 ### Bug Fixes
