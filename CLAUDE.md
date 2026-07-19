@@ -62,6 +62,10 @@ Published releases trigger `docker-publish.yml`, pushing `yiddy/simple-countdown
 
 - Vitest; unit tests co-located as `__tests__/<Subject>.test.ts` next to the module (see `src/service/__tests__/Date.test.ts`).
 - Test behavior, not implementation. Run `pnpm test` before reporting any task complete.
+- Tests ship with the change: any feature or fix PR includes its unit/component tests in the same
+  commit — don't defer coverage to a follow-up PR.
+- Component tests use Testing Library + jsdom (`test.environment: 'jsdom'` in `vite.config.ts`;
+  jest-dom matchers loaded via `src/test/setup.ts`).
 - `describe()` in `src/service/date.ts` must keep key insertion order day → hour → minute → second; `Home` renders blocks from `Object.entries` order.
 
 ## Docker
