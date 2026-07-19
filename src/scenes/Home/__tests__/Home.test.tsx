@@ -138,6 +138,7 @@ describe('Home', () => {
       screen.getByText('Set TIMER_TARGET to an ISO 8601 date, e.g. 2026-12-31T23:59:59'),
     ).toBeInTheDocument();
     expect(screen.queryByText(LABEL_PATTERN)).not.toBeInTheDocument();
+    expect(screen.queryByRole('timer')).not.toBeInTheDocument();
     expect(container.textContent).not.toContain('NaN');
   });
 
@@ -176,6 +177,52 @@ describe('Home', () => {
 
     expect(document.title).toBe('Easy countdown');
     expect(screen.queryByText('Easy countdown')).not.toBeInTheDocument();
+  });
+
+  it('announces the remaining time in a visually hidden live region on mount', async () => {
+    await renderHome({
+      target: new Date(base.getTime() + 2 * DAY + 3 * HOUR + 4 * MINUTE + 5 * SECOND),
+    });
+
+    const liveRegion = screen.getByRole('timer');
+    expect(liveRegion).toHaveTextContent('2 days, 3 hours, 4 minutes remaining');
+    expect(liveRegion).toHaveAttribute('aria-live', 'polite');
+    expect(liveRegion).toHaveAttribute('aria-atomic', 'true');
+    expect(liveRegion).toHaveClass('sr-only');
+  });
+
+  it('narrates the rollover into the final minute like a human would, then updates every second', async () => {
+    await renderHome({ target: new Date(base.getTime() + MINUTE + 30 * SECOND) });
+
+    const liveRegion = screen.getByRole('timer');
+    expect(liveRegion).toHaveTextContent('1 minute remaining');
+
+    tick(1000);
+    tick(1000);
+
+    // Still within the same remaining minute — the announcement stays put rather
+    // than showing a now-stale seconds count.
+    expect(liveRegion).toHaveTextContent('1 minute remaining');
+
+    tick(29 * 1000);
+
+    // Now inside the final minute — seconds become the meaningful unit.
+    expect(liveRegion).toHaveTextContent('59 seconds remaining');
+
+    // ...and, unlike the once-a-minute cadence above, it updates every second
+    // from here on, exactly as a human counting down the last moments would.
+    tick(1000);
+    expect(liveRegion).toHaveTextContent('58 seconds remaining');
+
+    tick(1000);
+    expect(liveRegion).toHaveTextContent('57 seconds remaining');
+  });
+
+  it('hides the decorative digit blocks from assistive technology but not the live region', async () => {
+    await renderHome({ target: new Date(base.getTime() + DAY) });
+
+    expect(screen.getByText('day').closest('[aria-hidden="true"]')).not.toBeNull();
+    expect(screen.getByRole('timer').closest('[aria-hidden="true"]')).toBeNull();
   });
 
   it('freezes at 00 00 00 00 with the completion message when the target passes', async () => {
@@ -285,5 +332,21 @@ describe('Home', () => {
 
     expect(navigationMock.reloadPage).not.toHaveBeenCalled();
     expect(navigationMock.redirectTo).not.toHaveBeenCalled();
+  });
+
+  it('marks the completion message as its own aria-live region and quiets the countdown one', async () => {
+    await renderHome({ target: new Date(base.getTime() + SECOND) });
+
+    const liveRegion = screen.getByRole('timer');
+    expect(liveRegion).toHaveTextContent('1 second remaining');
+
+    tick(1000);
+
+    // The countdown live region has nothing left to say once frozen — the
+    // completion message is announced through its own aria-live heading.
+    expect(liveRegion).toHaveTextContent('');
+    const message = screen.getByText(DEFAULT_DONE_MESSAGE);
+    expect(message).toHaveAttribute('aria-live', 'polite');
+    expect(message).toHaveAttribute('aria-atomic', 'true');
   });
 });

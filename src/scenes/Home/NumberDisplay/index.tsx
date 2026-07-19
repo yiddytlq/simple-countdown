@@ -22,7 +22,7 @@ function NumberDisplay({ value: v }: NumberDisplayProps) {
   const value = intro >= 0 ? intro : v;
 
   return (
-    <div className="relative h-[1em] w-[0.7em] overflow-hidden">
+    <div aria-hidden="true" className="relative h-[1em] w-[0.7em] overflow-hidden">
       <div
         className="relative h-full w-full transition-transform duration-[800ms]"
         style={{ transform: `translateY(-${value * 100}%)` }}

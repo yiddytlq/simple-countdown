@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { describe as describeDuration } from '../date';
+import { describe as describeDuration, formatRemaining } from '../date';
 
 const base = new Date('2030-01-01T00:00:00.000Z');
 
@@ -52,5 +52,33 @@ describe('describe', () => {
       'minute',
       'second',
     ]);
+  });
+});
+
+describe('formatRemaining', () => {
+  it('omits zero-valued higher units and drops seconds while minutes remain', () => {
+    expect(formatRemaining({ day: 3, hour: 4, minute: 12, second: 5 })).toBe(
+      '3 days, 4 hours, 12 minutes remaining',
+    );
+  });
+
+  it('omits zero-valued units surrounding a single nonzero unit', () => {
+    expect(formatRemaining({ day: 0, hour: 1, minute: 0, second: 1 })).toBe('1 hour remaining');
+  });
+
+  it('pluralizes values of two or more', () => {
+    expect(formatRemaining({ day: 2, hour: 23, minute: 59, second: 30 })).toBe(
+      '2 days, 23 hours, 59 minutes remaining',
+    );
+  });
+
+  it('speaks seconds only once day, hour, and minute are all zero', () => {
+    expect(formatRemaining({ day: 0, hour: 0, minute: 0, second: 45 })).toBe(
+      '45 seconds remaining',
+    );
+  });
+
+  it('falls back to "0 second remaining" once the countdown reaches zero', () => {
+    expect(formatRemaining({ day: 0, hour: 0, minute: 0, second: 0 })).toBe('0 second remaining');
   });
 });
