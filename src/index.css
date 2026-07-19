@@ -3,6 +3,22 @@
 
 @theme {
   --font-sans: 'Balsamiq Sans', ui-sans-serif, system-ui, sans-serif;
+  --animate-done-pulse: done-pulse 600ms ease-out both;
+
+  @keyframes done-pulse {
+    0% {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    60% {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
 }
 
 @layer base {

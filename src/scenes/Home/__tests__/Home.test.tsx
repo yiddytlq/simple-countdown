@@ -1,5 +1,14 @@
 import { act, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { DEFAULT_DONE_MESSAGE } from '../../../service/completion';
+
+// jsdom's window.location is unforgeable, so Home navigates through this
+// module; vi.hoisted keeps the same mock instances across vi.resetModules().
+const navigationMock = vi.hoisted(() => ({
+  reloadPage: vi.fn(),
+  redirectTo: vi.fn(),
+}));
+vi.mock('../../../service/navigation', () => navigationMock);
 
 const base = new Date('2030-01-01T00:00:00.000Z');
 
@@ -14,14 +23,40 @@ interface HomeGlobals {
   target: Date;
   title?: string;
   background?: string;
+  doneMessage?: string;
+  doneCountup?: boolean;
+  doneAnimation?: boolean;
+  doneHideTimer?: boolean;
+  doneReload?: boolean;
+  doneRedirectUrl?: string;
+  doneDelayMs?: number;
 }
 
 // Home resolves window.target at module scope, so the globals must be in place
 // before the module is (re-)imported — hence resetModules + dynamic import.
-async function renderHome({ target, title = '', background = 'background.jpg' }: HomeGlobals) {
+// Defaults mirror public/variables.js with no TIMER_* env vars set.
+async function renderHome({
+  target,
+  title = '',
+  background = 'background.jpg',
+  doneMessage = '',
+  doneCountup = false,
+  doneAnimation = false,
+  doneHideTimer = false,
+  doneReload = false,
+  doneRedirectUrl = '',
+  doneDelayMs = 3000,
+}: HomeGlobals) {
   window.target = target;
   window.title = title;
   window.background = background;
+  window.doneMessage = doneMessage;
+  window.doneCountup = doneCountup;
+  window.doneAnimation = doneAnimation;
+  window.doneHideTimer = doneHideTimer;
+  window.doneReload = doneReload;
+  window.doneRedirectUrl = doneRedirectUrl;
+  window.doneDelayMs = doneDelayMs;
   vi.resetModules();
   const { default: Home } = await import('../index');
   const result = render(<Home />);
@@ -57,12 +92,14 @@ function tick(ms: number) {
 }
 
 beforeEach(() => {
+  vi.clearAllMocks();
   vi.useFakeTimers();
   vi.setSystemTime(base);
 });
 
 afterEach(() => {
   vi.useRealTimers();
+  vi.restoreAllMocks();
 });
 
 describe('Home', () => {
@@ -113,14 +150,15 @@ describe('Home', () => {
     }
   });
 
-  it('counts up once the target has passed (current behavior)', async () => {
-    await renderHome({ target: new Date(base.getTime() - 2 * SECOND) });
+  it('keeps counting up past the target when TIMER_DONE_COUNTUP is set', async () => {
+    await renderHome({ target: new Date(base.getTime() - 2 * SECOND), doneCountup: true });
 
     expect(blockDigits('seconds')).toBe('02');
 
     tick(1000);
 
     expect(blockDigits('seconds')).toBe('03');
+    expect(screen.queryByText(DEFAULT_DONE_MESSAGE)).not.toBeInTheDocument();
   });
 
   it('sets document.title from window.title and renders it as the heading', async () => {
@@ -138,5 +176,114 @@ describe('Home', () => {
 
     expect(document.title).toBe('Easy countdown');
     expect(screen.queryByText('Easy countdown')).not.toBeInTheDocument();
+  });
+
+  it('freezes at 00 00 00 00 with the completion message when the target passes', async () => {
+    await renderHome({ target: new Date(base.getTime() + SECOND), title: 'T-minus' });
+
+    expect(screen.getByText('T-minus')).toBeInTheDocument();
+
+    tick(1000);
+
+    // The message replaces the title; the interval is stopped, so further
+    // ticks must not count back up.
+    expect(screen.getByText(DEFAULT_DONE_MESSAGE)).toBeInTheDocument();
+    expect(screen.queryByText('T-minus')).not.toBeInTheDocument();
+    tick(5000);
+    for (const label of labelTexts()) {
+      expect(blockDigits(label)).toBe('00');
+    }
+  });
+
+  it('shows a custom TIMER_DONE_MESSAGE', async () => {
+    await renderHome({
+      target: new Date(base.getTime() - SECOND),
+      doneMessage: 'Happy launch day!',
+    });
+
+    expect(screen.getByText('Happy launch day!')).toBeInTheDocument();
+  });
+
+  it('hides the blocks in the done state when TIMER_DONE_HIDE_TIMER is set', async () => {
+    await renderHome({ target: new Date(base.getTime() - SECOND), doneHideTimer: true });
+
+    expect(screen.getByText(DEFAULT_DONE_MESSAGE)).toBeInTheDocument();
+    expect(screen.queryByText(LABEL_PATTERN)).not.toBeInTheDocument();
+  });
+
+  it('applies the pulse animation class only when TIMER_DONE_ANIMATION is set', async () => {
+    const animated = await renderHome({
+      target: new Date(base.getTime() - SECOND),
+      doneAnimation: true,
+    });
+    expect(screen.getByText(DEFAULT_DONE_MESSAGE)).toHaveClass('motion-safe:animate-done-pulse');
+    animated.unmount();
+
+    await renderHome({ target: new Date(base.getTime() - SECOND) });
+    expect(screen.getByText(DEFAULT_DONE_MESSAGE)).not.toHaveClass(
+      'motion-safe:animate-done-pulse',
+    );
+  });
+
+  it('reloads after the configured delay when TIMER_DONE_RELOAD is set', async () => {
+    await renderHome({
+      target: new Date(base.getTime() + SECOND),
+      doneReload: true,
+      doneDelayMs: 2000,
+    });
+
+    tick(1000);
+    expect(navigationMock.reloadPage).not.toHaveBeenCalled();
+
+    tick(1999);
+    expect(navigationMock.reloadPage).not.toHaveBeenCalled();
+
+    tick(1);
+    expect(navigationMock.reloadPage).toHaveBeenCalledOnce();
+  });
+
+  it('redirects instead of reloading when both are configured', async () => {
+    await renderHome({
+      target: new Date(base.getTime() + SECOND),
+      doneReload: true,
+      doneRedirectUrl: 'https://example.com/live',
+    });
+
+    tick(1000);
+    tick(3000);
+
+    expect(navigationMock.redirectTo).toHaveBeenCalledExactlyOnceWith('https://example.com/live');
+    expect(navigationMock.reloadPage).not.toHaveBeenCalled();
+  });
+
+  it('falls back to reload when the redirect URL is invalid', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+    await renderHome({
+      target: new Date(base.getTime() + SECOND),
+      doneReload: true,
+      doneRedirectUrl: 'not a url',
+    });
+
+    tick(1000);
+    tick(3000);
+
+    expect(warn).toHaveBeenCalled();
+    expect(navigationMock.redirectTo).not.toHaveBeenCalled();
+    expect(navigationMock.reloadPage).toHaveBeenCalledOnce();
+  });
+
+  it('never reloads or redirects in countup mode', async () => {
+    await renderHome({
+      target: new Date(base.getTime() - SECOND),
+      doneCountup: true,
+      doneReload: true,
+      doneRedirectUrl: 'https://example.com/live',
+    });
+
+    tick(10_000);
+
+    expect(navigationMock.reloadPage).not.toHaveBeenCalled();
+    expect(navigationMock.redirectTo).not.toHaveBeenCalled();
   });
 });

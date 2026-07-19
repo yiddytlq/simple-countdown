@@ -22,6 +22,11 @@ describe('describe', () => {
     expect(describeDuration(base, base)).toEqual({ day: 0, hour: 0, minute: 0, second: 0 });
   });
 
+  it('counts back up after the target has passed', () => {
+    const target = offset(-(1 * HOUR + 30 * MINUTE));
+    expect(describeDuration(base, target)).toEqual({ day: 0, hour: 1, minute: 30, second: 0 });
+  });
+
   it('is symmetric in its arguments', () => {
     const target = offset(5 * DAY + 6 * HOUR);
     expect(describeDuration(base, target)).toEqual(describeDuration(target, base));

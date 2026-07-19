@@ -5,4 +5,11 @@ declare interface Window {
   background: string;
   target: Date;
   title: string;
+  doneMessage: string;
+  doneCountup: boolean;
+  doneAnimation: boolean;
+  doneHideTimer: boolean;
+  doneReload: boolean;
+  doneRedirectUrl: string;
+  doneDelayMs: number;
 }
