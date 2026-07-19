@@ -9,7 +9,8 @@ export default defineConfig({
   build: { outDir: 'build' },
   server: { port: 3000 },
   test: {
-    environment: 'node',
+    environment: 'jsdom',
     include: ['src/**/__tests__/**/*.test.ts?(x)'],
+    setupFiles: ['src/test/setup.ts'],
   },
 });
