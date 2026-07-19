@@ -1,3 +1,10 @@
 window.background = '__BACKGROUND__';
 window.target = new Date('__END__');
 window.title = '__TITLE__' || '';
+window.doneMessage = '__DONE_MESSAGE__' || '';
+window.doneCountup = '__DONE_COUNTUP__' === 'true';
+window.doneAnimation = '__DONE_ANIMATION__' === 'true';
+window.doneHideTimer = '__DONE_HIDE_TIMER__' === 'true';
+window.doneReload = '__DONE_RELOAD__' === 'true';
+window.doneRedirectUrl = '__DONE_REDIRECT_URL__' || '';
+window.doneDelayMs = Number('__DONE_DELAY_MS__' || '3000');

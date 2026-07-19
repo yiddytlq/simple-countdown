@@ -7,7 +7,11 @@ cp "$dir/variables.js" "$dir/variables-final.js" || {
     exit 1
 }
 
-for pair in "__BACKGROUND__=$TIMER_BACKGROUND" "__END__=$TIMER_TARGET" "__TITLE__=$TIMER_TITLE"; do
+for pair in "__BACKGROUND__=$TIMER_BACKGROUND" "__END__=$TIMER_TARGET" "__TITLE__=$TIMER_TITLE" \
+    "__DONE_MESSAGE__=$TIMER_DONE_MESSAGE" "__DONE_COUNTUP__=$TIMER_DONE_COUNTUP" \
+    "__DONE_ANIMATION__=$TIMER_DONE_ANIMATION" "__DONE_HIDE_TIMER__=$TIMER_DONE_HIDE_TIMER" \
+    "__DONE_RELOAD__=$TIMER_DONE_RELOAD" "__DONE_REDIRECT_URL__=$TIMER_DONE_REDIRECT_URL" \
+    "__DONE_DELAY_MS__=$TIMER_DONE_DELAY_MS"; do
     placeholder=${pair%%=*}
     value=${pair#*=}
     sed -i -e "s@$placeholder@$value@g" "$dir/variables-final.js" || {
