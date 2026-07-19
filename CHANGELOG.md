@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/yiddytlq/simple-countdown/compare/v1.1.0...v1.1.1) (2026-07-19)
+
+
+### Bug Fixes
+
+* show configuration error instead of NaN countdown for invalid TIMER_TARGET ([#149](https://github.com/yiddytlq/simple-countdown/issues/149)) ([71ce8cb](https://github.com/yiddytlq/simple-countdown/commit/71ce8cb699d76e937beeda1bb3fa4bf449852f92))
+
 # [1.1.0](https://github.com/yiddytlq/simple-countdown/compare/v1.0.0...v1.1.0) (2026-07-19)
 
 
