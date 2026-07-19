@@ -14,7 +14,9 @@ else
 fi
 
 # Presence only - values may be long or sensitive
-for name in TIMER_BACKGROUND TIMER_TARGET TIMER_TITLE; do
+for name in TIMER_BACKGROUND TIMER_TARGET TIMER_TITLE TIMER_DONE_MESSAGE TIMER_DONE_COUNTUP \
+    TIMER_DONE_ANIMATION TIMER_DONE_HIDE_TIMER TIMER_DONE_RELOAD TIMER_DONE_REDIRECT_URL \
+    TIMER_DONE_DELAY_MS; do
     eval "value=\${$name:-}"
     if [ -n "$value" ]; then
         echo "[entrypoint] $name set"
