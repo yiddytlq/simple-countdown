@@ -1,8 +1,27 @@
 #!/bin/sh
 set -e
 
+echo "[entrypoint] simple-countdown container starting"
+
 # Inject TIMER_* env vars into variables-final.js at container start,
 # so one prebuilt image is configured per-deployment.
-/variables.sh /usr/share/nginx/html
+if /variables.sh /usr/share/nginx/html; then
+    echo "[entrypoint] runtime configuration injected"
+else
+    status=$?
+    echo "[entrypoint] ERROR: variables.sh failed with exit code $status" >&2
+    exit "$status"
+fi
 
+# Presence only - values may be long or sensitive
+for name in TIMER_BACKGROUND TIMER_TARGET TIMER_TITLE; do
+    eval "value=\${$name:-}"
+    if [ -n "$value" ]; then
+        echo "[entrypoint] $name set"
+    else
+        echo "[entrypoint] $name not set"
+    fi
+done
+
+echo "[entrypoint] starting nginx"
 exec nginx -g 'daemon off;'

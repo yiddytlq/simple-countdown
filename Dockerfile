@@ -26,4 +26,7 @@ COPY variables.sh docker-entrypoint.sh /
 
 EXPOSE 3000
 
+# wget is a busybox applet already present in nginx:alpine-slim — no extra packages
+HEALTHCHECK CMD wget -qO- http://127.0.0.1:3000/ >/dev/null || exit 1
+
 ENTRYPOINT ["/docker-entrypoint.sh"]
