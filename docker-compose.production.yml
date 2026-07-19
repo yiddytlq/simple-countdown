@@ -1,10 +1,16 @@
 services:
   web:
     stdin_open: true # So that the serving is not exited with code 0
-    image: yooooomi/easy-countdown
+    image: yiddy/simple-countdown
     environment:
       TIMER_BACKGROUND: https://wallpaperplay.com/walls/full/0/7/6/29912.jpg
       TIMER_TARGET: 'Fri Oct 01 2021 15:33:36 GMT+0200' # Get help with https://esqsoft.com/javascript_examples/date-to-epoch.htm
       TIMER_TITLE: 'My next birthday'
     ports:
       - '3000:3000'
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3000/ >/dev/null || exit 1']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

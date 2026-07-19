@@ -1,7 +1,19 @@
 #!/bin/sh
 
-cp $1/variables.js $1/variables-final.js
+dir=$1
 
-sed -i -e "s@__BACKGROUND__@$TIMER_BACKGROUND@g" $1/variables-final.js
-sed -i -e "s@__END__@$TIMER_TARGET@g" $1/variables-final.js
-sed -i -e "s@__TITLE__@$TIMER_TITLE@g" $1/variables-final.js
+cp "$dir/variables.js" "$dir/variables-final.js" || {
+    echo "[variables.sh] ERROR: cannot copy $dir/variables.js to $dir/variables-final.js" >&2
+    exit 1
+}
+
+for pair in "__BACKGROUND__=$TIMER_BACKGROUND" "__END__=$TIMER_TARGET" "__TITLE__=$TIMER_TITLE"; do
+    placeholder=${pair%%=*}
+    value=${pair#*=}
+    sed -i -e "s@$placeholder@$value@g" "$dir/variables-final.js" || {
+        echo "[variables.sh] ERROR: substitution of $placeholder failed" >&2
+        exit 1
+    }
+done
+
+echo "[variables.sh] substituted TIMER_* placeholders into $dir/variables-final.js"
