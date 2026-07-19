@@ -1,4 +1,5 @@
 build/
+CHANGELOG.md
 coverage/
 pnpm-lock.yaml
 public/variables-final.js
