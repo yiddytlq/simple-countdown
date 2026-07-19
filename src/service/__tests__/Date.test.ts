@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { describe as describeDuration } from '../date';
+import { describe as describeDuration, formatRemaining } from '../date';
 
 const base = new Date('2030-01-01T00:00:00.000Z');
 
@@ -47,5 +47,25 @@ describe('describe', () => {
       'minute',
       'second',
     ]);
+  });
+});
+
+describe('formatRemaining', () => {
+  it('formats a sentence in day → hour → minute → second order', () => {
+    expect(formatRemaining({ day: 3, hour: 4, minute: 12, second: 5 })).toBe(
+      '3 days, 4 hours, 12 minutes, 5 seconds remaining',
+    );
+  });
+
+  it('keeps 0 and 1 singular, matching the visual block labels', () => {
+    expect(formatRemaining({ day: 0, hour: 1, minute: 0, second: 1 })).toBe(
+      '0 day, 1 hour, 0 minute, 1 second remaining',
+    );
+  });
+
+  it('pluralizes values of two or more', () => {
+    expect(formatRemaining({ day: 2, hour: 23, minute: 59, second: 30 })).toBe(
+      '2 days, 23 hours, 59 minutes, 30 seconds remaining',
+    );
   });
 });

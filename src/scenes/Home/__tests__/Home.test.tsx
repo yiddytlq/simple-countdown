@@ -139,4 +139,46 @@ describe('Home', () => {
     expect(document.title).toBe('Easy countdown');
     expect(screen.queryByText('Easy countdown')).not.toBeInTheDocument();
   });
+
+  it('announces the remaining time in a visually hidden live region on mount', async () => {
+    await renderHome({
+      target: new Date(base.getTime() + 2 * DAY + 3 * HOUR + 4 * MINUTE + 5 * SECOND),
+    });
+
+    const liveRegion = screen.getByRole('timer');
+    expect(liveRegion).toHaveTextContent('2 days, 3 hours, 4 minutes, 5 seconds remaining');
+    expect(liveRegion).toHaveAttribute('aria-live', 'polite');
+    expect(liveRegion).toHaveAttribute('aria-atomic', 'true');
+    expect(liveRegion).toHaveClass('sr-only');
+  });
+
+  it('updates the announcement when the remaining minute changes, not every second', async () => {
+    await renderHome({ target: new Date(base.getTime() + MINUTE + 30 * SECOND) });
+
+    const liveRegion = screen.getByRole('timer');
+    expect(liveRegion).toHaveTextContent('0 day, 0 hour, 1 minute, 30 seconds remaining');
+
+    tick(1000);
+    tick(1000);
+
+    // Still within the same remaining minute — the stale announcement stays put.
+    expect(liveRegion).toHaveTextContent('0 day, 0 hour, 1 minute, 30 seconds remaining');
+
+    tick(29 * 1000);
+
+    expect(liveRegion).toHaveTextContent('0 day, 0 hour, 0 minute, 59 seconds remaining');
+  });
+
+  it('hides the decorative digit blocks from assistive technology but not the live region', async () => {
+    await renderHome({ target: new Date(base.getTime() + DAY) });
+
+    expect(screen.getByText('day').closest('[aria-hidden="true"]')).not.toBeNull();
+    expect(screen.getByRole('timer').closest('[aria-hidden="true"]')).toBeNull();
+  });
+
+  it('renders no timer live region for an invalid target', async () => {
+    await renderHome({ target: new Date('__END__') });
+
+    expect(screen.queryByRole('timer')).not.toBeInTheDocument();
+  });
 });

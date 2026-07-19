@@ -1,5 +1,5 @@
-import { useEffect, useState, useMemo } from 'react';
-import { describe } from '../../service/date';
+import { useEffect, useState, useMemo, useRef } from 'react';
+import { describe, formatRemaining } from '../../service/date';
 import { resolveTarget } from '../../service/target';
 import Block from './Block';
 
@@ -7,6 +7,8 @@ const end = resolveTarget(window.target);
 
 function Home() {
   const [date, setDate] = useState(new Date());
+  const [announcement, setAnnouncement] = useState('');
+  const lastAnnouncedMinuteRef = useRef<number | null>(null);
 
   useEffect(() => {
     document.title = window.title || 'Easy countdown';
@@ -24,6 +26,19 @@ function Home() {
     }
     return describe(date, end);
   }, [date]);
+
+  // Announce once per minute, not per second — a live region updating every
+  // second is unusable with a screen reader.
+  useEffect(() => {
+    if (end === null || described === null) {
+      return;
+    }
+    const minute = Math.floor(Math.abs(end.getTime() - date.getTime()) / 60000);
+    if (minute !== lastAnnouncedMinuteRef.current) {
+      lastAnnouncedMinuteRef.current = minute;
+      setAnnouncement(formatRemaining(described));
+    }
+  }, [date, described]);
 
   return (
     <div
@@ -47,7 +62,15 @@ function Home() {
                 {window.title}
               </div>
             )}
-            <div className="flex flex-wrap items-start justify-center gap-3 sm:gap-4">
+            <div className="sr-only" role="timer" aria-live="polite" aria-atomic="true">
+              {announcement}
+            </div>
+            {/* Redundant with the live region above — hidden so screen readers
+                don't read the slot-machine digit stacks. */}
+            <div
+              aria-hidden="true"
+              className="flex flex-wrap items-start justify-center gap-3 sm:gap-4"
+            >
               {Object.entries(described).map(([key, value]) => (
                 <Block
                   key={key}

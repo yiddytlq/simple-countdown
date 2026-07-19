@@ -21,3 +21,9 @@ export function describe(a: Date, b: Date): Record<DurationLabel, number> {
   }
   return result;
 }
+
+// Same singular/plural rule as the visual block labels (0 and 1 are singular).
+export function formatRemaining(parts: Record<DurationLabel, number>): string {
+  const segments = labels.map((label) => `${parts[label]} ${label}${parts[label] > 1 ? 's' : ''}`);
+  return `${segments.join(', ')} remaining`;
+}
