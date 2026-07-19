@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/yiddytlq/simple-countdown/compare/v1.2.0...v1.3.0) (2026-07-19)
+
+
+### Features
+
+* announce remaining time to screen readers via throttled aria-live region ([#153](https://github.com/yiddytlq/simple-countdown/issues/153)) ([b0064c6](https://github.com/yiddytlq/simple-countdown/commit/b0064c66759941b38e6bced62c0cd1601c31da81))
+
 # [1.2.0](https://github.com/yiddytlq/simple-countdown/compare/v1.1.1...v1.2.0) (2026-07-19)
 
 
