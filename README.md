@@ -36,6 +36,27 @@ services:
 
 Release images are tagged with their semantic version (e.g. `yiddy/simple-countdown:1.2.3`) as well as `latest`.
 
+### Logs
+
+Everything the container does is logged to stdout/stderr, so the standard Docker commands show it:
+
+```sh
+docker logs <container>       # or: docker compose logs -f web
+```
+
+What you'll see:
+
+- **Startup configuration summary** — the entrypoint confirms the runtime variables were injected
+  and reports, for each `TIMER_*` variable, whether it was set (values themselves are not logged).
+- **nginx access and error logs** — the image forwards them to stdout/stderr.
+- **Failures** — if variable injection fails, the reason is logged before the container exits.
+
+The image also ships a `HEALTHCHECK` that fetches `http://127.0.0.1:3000/`; inspect its status with:
+
+```sh
+docker inspect --format '{{json .State.Health}}' <container>
+```
+
 ## Without docker
 
 > This method builds the project with the env variables you provide, producing a `build` folder that has to be served manually afterwards.
