@@ -51,21 +51,29 @@ describe('describe', () => {
 });
 
 describe('formatRemaining', () => {
-  it('formats a sentence in day → hour → minute → second order', () => {
+  it('omits zero-valued higher units and drops seconds while minutes remain', () => {
     expect(formatRemaining({ day: 3, hour: 4, minute: 12, second: 5 })).toBe(
-      '3 days, 4 hours, 12 minutes, 5 seconds remaining',
+      '3 days, 4 hours, 12 minutes remaining',
     );
   });
 
-  it('keeps 0 and 1 singular, matching the visual block labels', () => {
-    expect(formatRemaining({ day: 0, hour: 1, minute: 0, second: 1 })).toBe(
-      '0 day, 1 hour, 0 minute, 1 second remaining',
-    );
+  it('omits zero-valued units surrounding a single nonzero unit', () => {
+    expect(formatRemaining({ day: 0, hour: 1, minute: 0, second: 1 })).toBe('1 hour remaining');
   });
 
   it('pluralizes values of two or more', () => {
     expect(formatRemaining({ day: 2, hour: 23, minute: 59, second: 30 })).toBe(
-      '2 days, 23 hours, 59 minutes, 30 seconds remaining',
+      '2 days, 23 hours, 59 minutes remaining',
     );
+  });
+
+  it('speaks seconds only once day, hour, and minute are all zero', () => {
+    expect(formatRemaining({ day: 0, hour: 0, minute: 0, second: 45 })).toBe(
+      '45 seconds remaining',
+    );
+  });
+
+  it('falls back to "0 second remaining" once the countdown reaches zero', () => {
+    expect(formatRemaining({ day: 0, hour: 0, minute: 0, second: 0 })).toBe('0 second remaining');
   });
 });
