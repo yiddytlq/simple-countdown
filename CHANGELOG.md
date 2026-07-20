@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/yiddytlq/simple-countdown/compare/v1.5.1...v1.6.0) (2026-07-20)
+
+
+### Features
+
+* warn when TIMER_TARGET datetime lacks a UTC offset ([#163](https://github.com/yiddytlq/simple-countdown/issues/163)) ([44c1a0e](https://github.com/yiddytlq/simple-countdown/commit/44c1a0e52a56bf8638cd0c591d37d119c33b098d))
+
 ## [1.5.1](https://github.com/yiddytlq/simple-countdown/compare/v1.5.0...v1.5.1) (2026-07-20)
 
 
