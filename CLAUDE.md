@@ -53,17 +53,23 @@ The primary deployment target is a single Docker container configured at **runti
 ## CI gates (all must pass)
 
 `.github/workflows/ci.yml` on push/PR to master: `pnpm lint`, `pnpm format:check`, `pnpm typecheck`,
-`pnpm test` (Vitest), `pnpm build`, `pnpm audit --audit-level high` (high/critical CVEs fail CI), and
-gitleaks secret scanning over full git history (any committed secret fails CI).
+`pnpm test:coverage` (Vitest + v8 coverage — **an enforced coverage floor fails CI on regression**; see Testing),
+`pnpm build`, a Playwright E2E smoke test (`e2e` job), `pnpm audit --audit-level high` (high/critical CVEs fail CI),
+and gitleaks secret scanning over full git history (any committed secret fails CI).
 CodeQL (`codeql.yml`) scans JS/TS + Actions. Dependabot opens weekly bump PRs (npm, docker, github-actions).
 Published releases trigger `docker-publish.yml`, pushing `yiddy/simple-countdown:<semver>` and `:latest`.
 
 ## Testing
 
 - Vitest; unit tests co-located as `__tests__/<Subject>.test.ts` next to the module (see `src/service/__tests__/Date.test.ts`).
-- Test behavior, not implementation. Run `pnpm test` before reporting any task complete.
+- Test behavior, not implementation. Run `pnpm test` (or `pnpm test:coverage`) before reporting any task complete.
 - Tests ship with the change: any feature or fix PR includes its unit/component tests in the same
   commit — don't defer coverage to a follow-up PR.
+- **Coverage is enforced.** `pnpm test:coverage` runs v8 coverage and CI fails if it drops below the
+  floor in `vite.config.ts`'s `test.coverage.thresholds` (currently lines/statements 90%, functions/branches 85%;
+  actual is higher). New code must keep coverage at or above the floor — the fix is to add tests, never
+  to lower a threshold. **Ratchet the floor UP** toward the actual as coverage climbs; the CI job summary
+  prints the current coverage table each run.
 - Component tests use Testing Library + jsdom (`test.environment: 'jsdom'` in `vite.config.ts`;
   jest-dom matchers loaded via `src/test/setup.ts`).
 - `describe()` in `src/service/date.ts` must keep key insertion order day → hour → minute → second; `Home` renders blocks from `Object.entries` order.

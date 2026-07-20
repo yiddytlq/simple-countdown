@@ -31,7 +31,8 @@ jobs:
           node --input-type=module <<'EOF'
           import { readFileSync, appendFileSync } from 'node:fs';
           const out = process.env.GITHUB_STEP_SUMMARY;
-          const TARGET = 60; // soft line-coverage target; not a hard gate — ratchet later
+          // Coverage floors are enforced by Vitest's coverage.thresholds (see vite.config.ts); the
+          // test:coverage step above fails the job on a regression. This step only renders the table.
           let data;
           try {
             data = JSON.parse(readFileSync('coverage/coverage-summary.json', 'utf8'));
@@ -51,13 +52,10 @@ jobs:
             row('Functions', t.functions),
             row('Branches', t.branches),
             '',
-            `_Soft target: ${TARGET}% lines — reported, not enforced (ratchet later)._`,
+            '_Enforced floor: lines/statements 90%, functions/branches 85% (see vite.config.ts). Ratchet up over time._',
             '',
           ].join('\n');
           if (out) appendFileSync(out, table);
-          if (t.lines.pct < TARGET) {
-            console.log(`::warning::Line coverage ${t.lines.pct}% is below the soft target of ${TARGET}%.`);
-          }
           EOF
       - run: pnpm build
         env:
