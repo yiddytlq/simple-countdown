@@ -3,10 +3,12 @@ import { describe, formatRemaining } from '../../service/date';
 import { resolveTarget, warnIfAmbiguousTimezone } from '../../service/target';
 import { resolveCompletion } from '../../service/completion';
 import { redirectTo, reloadPage } from '../../service/navigation';
+import { resolveBackground, preloadImage } from '../../service/background';
 import Block from './Block';
 
 const end = resolveTarget(window.target);
 warnIfAmbiguousTimezone(window.targetRaw, end);
+const backgroundUrl = resolveBackground(window.background);
 const completion = resolveCompletion({
   countup: window.doneCountup,
   message: window.doneMessage,
@@ -22,6 +24,7 @@ const headingClasses = 'mb-4 text-center text-3xl text-white sm:mb-6 sm:text-4xl
 function Home() {
   const [date, setDate] = useState(new Date());
   const [announcement, setAnnouncement] = useState('');
+  const [backgroundFailed, setBackgroundFailed] = useState(false);
   const lastAnnouncedBucketRef = useRef<number | null>(null);
 
   // In countup mode there is no done state: the timer runs forever.
@@ -43,6 +46,21 @@ function Home() {
       clearInterval(inter);
     };
   }, [done]);
+
+  useEffect(() => {
+    if (backgroundUrl === null) {
+      return;
+    }
+    let cancelled = false;
+    void preloadImage(backgroundUrl).then((ok) => {
+      if (!cancelled && !ok) {
+        setBackgroundFailed(true);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (!done || completion.mode !== 'freeze' || completion.followUp === null) {
@@ -96,10 +114,14 @@ function Home() {
     }
   }, [date, described, doneState]);
 
+  const showBackground = backgroundUrl !== null && !backgroundFailed;
+
   return (
     <div
-      className="flex h-dvh items-center justify-center bg-cover bg-center bg-no-repeat"
-      style={{ backgroundImage: `url('${window.background}')` }}
+      className={`flex h-dvh items-center justify-center bg-cover bg-center bg-no-repeat ${
+        showBackground ? '' : 'bg-gradient-to-br from-slate-800 to-slate-950'
+      }`}
+      style={showBackground ? { backgroundImage: `url('${backgroundUrl}')` } : undefined}
     >
       <div className="flex flex-col items-center px-4">
         {described === null ? (
