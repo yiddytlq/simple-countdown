@@ -60,31 +60,33 @@ jobs:
 
       - name: Format event details as one line
         id: event_info
+        env:
+          EVENT: ${{ github.event_name }}
+          BRANCH: ${{ github.ref_name }}
+          COMMITS_JSON: ${{ toJson(github.event.commits) }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_ACTION: ${{ github.event.action }}
+          PR_BRANCH: ${{ github.event.pull_request.head.ref }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_ACTION: ${{ github.event.action }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          WORKFLOW_NAME: ${{ github.event.workflow.name }}
         run: |
-          EVENT="${{ github.event_name }}"
           DETAILS=""
           case "$EVENT" in
             push)
-              BRANCH="${{ github.ref_name }}"
-              COMMITS=$(echo '${{ toJson(github.event.commits) }}' | jq -r '.[].message')
+              COMMITS=$(echo "$COMMITS_JSON" | jq -r '.[].message')
               COMMITS=$(echo "$COMMITS" | tr '\n' ' | ' | sed 's/| $//; s/"/\\"/g')
               DETAILS="Commits pushed to \`$BRANCH\`: $COMMITS"
               ;;
             pull_request)
-              TITLE="${{ github.event.pull_request.title }}"
-              ACTION="${{ github.event.action }}"
-              BRANCH="${{ github.event.pull_request.head.ref }}"
-              DETAILS="Pull Request *$ACTION*: \`$TITLE\` (branch: \`$BRANCH\`)"
+              DETAILS="Pull Request *$PR_ACTION*: \`$PR_TITLE\` (branch: \`$PR_BRANCH\`)"
               ;;
             issues)
-              TITLE="${{ github.event.issue.title }}"
-              ACTION="${{ github.event.action }}"
-              NUMBER="${{ github.event.issue.number }}"
-              DETAILS="Issue *$ACTION*: \`#$NUMBER - $TITLE\`"
+              DETAILS="Issue *$ISSUE_ACTION*: \`#$ISSUE_NUMBER - $ISSUE_TITLE\`"
               ;;
             workflow_run)
-              NAME="${{ github.event.workflow.name }}"
-              DETAILS="Workflow run triggered by *$NAME*"
+              DETAILS="Workflow run triggered by *$WORKFLOW_NAME*"
               ;;
             *)
               DETAILS="$EVENT event triggered"
