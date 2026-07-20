@@ -49,5 +49,5 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
           repository: yiddy/simple-countdown
-          short-description: "Self-hostable countdown timer. nginx-based (~21MB), configured via TIMER_* env vars at runtime."
+          short-description: 'Self-hostable countdown timer. nginx-based (~21MB), configured via TIMER_* env vars at runtime.'
           readme-filepath: ./README.md
