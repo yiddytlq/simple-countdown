@@ -2,6 +2,7 @@ services:
   web:
     build:
       target: base
+    env_file: .env
     command: pnpm dev -- --host
     volumes:
       - './src/:/app/src/'

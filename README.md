@@ -6,18 +6,19 @@
 
 Simple countdown is an easy to setup countdown page. Can be setup as a countdown or as a timer.
 
-## Using docker (Recommended)
+## Setup
 
-Edit `docker-compose.yml` to fit your needs. The published image (`yiddy/simple-countdown`) is
-built on `nginx:alpine-slim` (~21 MB) — no Node.js or `node_modules` in the runtime container — and
-all `TIMER_*` variables below are injected at **container start**, so one prebuilt image works for
-any deployment.
+Copy `.env.example` to `.env` and fill in your values:
+
+```sh
+cp .env.example .env
+```
 
 | Variables               | Definition                                                                                                            | Example                                              |
 | ----------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
 | TIMER_BACKGROUND        | The url of an image that will be used for as background                                                               | https://wallpaperplay.com/walls/full/0/7/6/29912.jpg |
-| TIMER_TARGET            | The target date of the countdown — always include an explicit UTC offset (e.g. `Z` or `+02:00`)                       | Fri Oct 01 2021 15:33:36 GMT+0200                    |
-| TIMER_TITLE             | The title of the countdown, can be empty                                                                              | My title!                                            |
+| TIMER_TARGET            | The target date of the countdown — always include an explicit UTC offset (e.g. `Z` or `+02:00`)                       | 2026-12-31T23:59:59Z                                 |
+| TIMER_TITLE             | The title of the countdown, can be empty                                                                              | My next birthday                                     |
 | TIMER_DONE_MESSAGE      | Text shown when the countdown reaches zero (default `The wait is over!`)                                              | Happy new year!                                      |
 | TIMER_DONE_COUNTUP      | `true`/`false` (default `false`) — keep counting up past zero instead of freezing; overrides all other `TIMER_DONE_*` | true                                                 |
 | TIMER_DONE_ANIMATION    | `true`/`false` (default `false`) — pulse animation on the completion message (skipped for reduced motion users)       | true                                                 |
@@ -26,29 +27,62 @@ any deployment.
 | TIMER_DONE_REDIRECT_URL | http(s) URL to navigate to after the done state; takes priority over `TIMER_DONE_RELOAD` when both are set            | https://example.com/live                             |
 | TIMER_DONE_DELAY_MS     | How long (ms, default `3000`) the done state stays visible before reload/redirect fires                               | 5000                                                 |
 
-Omitting the UTC offset on `TIMER_TARGET` means each viewer sees a different remaining time, since
-it's then parsed in their local timezone.
+Don't quote values in `.env` — omitting the UTC offset on `TIMER_TARGET` means each viewer sees a
+different remaining time, since it's then parsed in their local timezone.
 
-### Example `docker-compose.yml`
+## Usage
 
-```yml
-services:
-  web:
-    image: yiddy/simple-countdown
-    environment:
-      TIMER_BACKGROUND: https://wallpaperplay.com/walls/full/0/7/6/29912.jpg
-      TIMER_TARGET: 'Fri Oct 01 2021 15:33:36 GMT+0200' # Get help with https://esqsoft.com/javascript_examples/date-to-epoch.htm
-      TIMER_TITLE: 'My next birthday' # Can be empty
-    ports:
-      - '3000:3000'
+```sh
+. ./load-env.sh
+pnpm install
+pnpm build
+pnpm dlx serve -s -l tcp://0.0.0.0:3000 build/
 ```
 
-Release images are tagged with their semantic version (e.g. `yiddy/simple-countdown:1.2.3`) as well
-as `latest`.
+## Using docker
 
-## Without docker, logs, and local development
+The published image (`yiddy/simple-countdown`, built on `nginx:alpine-slim`, ~21 MB — no Node.js
+or `node_modules` in the runtime container) reads the same `.env`:
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+```sh
+docker run -d --env-file .env -p 3000:3000 yiddy/simple-countdown
+```
+
+## Using docker compose
+
+`docker-compose.yml` maps every variable from `.env` (Compose auto-loads it for `${VAR}`
+substitution):
+
+```yaml
+environment:
+  TIMER_BACKGROUND: ${TIMER_BACKGROUND}
+  TIMER_TARGET: ${TIMER_TARGET}
+  TIMER_TITLE: ${TIMER_TITLE}
+  TIMER_DONE_MESSAGE: ${TIMER_DONE_MESSAGE}
+  TIMER_DONE_COUNTUP: ${TIMER_DONE_COUNTUP}
+  TIMER_DONE_ANIMATION: ${TIMER_DONE_ANIMATION}
+  TIMER_DONE_HIDE_TIMER: ${TIMER_DONE_HIDE_TIMER}
+  TIMER_DONE_RELOAD: ${TIMER_DONE_RELOAD}
+  TIMER_DONE_REDIRECT_URL: ${TIMER_DONE_REDIRECT_URL}
+  TIMER_DONE_DELAY_MS: ${TIMER_DONE_DELAY_MS}
+```
+
+```sh
+docker compose up
+```
+
+For production — pulling the published image and loading `.env` straight via `env_file:`:
+
+```sh
+docker compose -f docker-compose.production.yml up
+```
+
+Release images are tagged with their semantic version (e.g. `yiddy/simple-countdown:1.2.3`) as
+well as `latest`.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for logs and local development.
 
 ## Credits
 

@@ -1,19 +1,5 @@
 # Contributing
 
-## Without docker
-
-> This method builds the project with the env variables you provide, producing a `build` folder that has to be served manually afterwards.
-
-This project uses [pnpm](https://pnpm.io) exclusively — do not use npm or yarn.
-
-```sh
-pnpm install
-TIMER_TARGET="Fri Oct 01 2021 15:33:36 GMT+0200" TIMER_TITLE="example" pnpm build
-pnpm dlx serve -s -l tcp://0.0.0.0:3000 build/
-```
-
-> Variables are the same as the table in README.md.
-
 ## Logs
 
 ```sh

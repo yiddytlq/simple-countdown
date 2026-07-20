@@ -4,9 +4,16 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      TIMER_BACKGROUND: https://wallpaperplay.com/walls/full/0/7/6/29912.jpg
-      TIMER_TARGET: 'Wed Oct 28 2020 00:00:00 GMT+0100' # Get help with https://esqsoft.com/javascript_examples/date-to-epoch.htm
-      TIMER_TITLE: 'My birthday in'
+      TIMER_BACKGROUND: ${TIMER_BACKGROUND}
+      TIMER_TARGET: ${TIMER_TARGET}
+      TIMER_TITLE: ${TIMER_TITLE}
+      TIMER_DONE_MESSAGE: ${TIMER_DONE_MESSAGE}
+      TIMER_DONE_COUNTUP: ${TIMER_DONE_COUNTUP}
+      TIMER_DONE_ANIMATION: ${TIMER_DONE_ANIMATION}
+      TIMER_DONE_HIDE_TIMER: ${TIMER_DONE_HIDE_TIMER}
+      TIMER_DONE_RELOAD: ${TIMER_DONE_RELOAD}
+      TIMER_DONE_REDIRECT_URL: ${TIMER_DONE_REDIRECT_URL}
+      TIMER_DONE_DELAY_MS: ${TIMER_DONE_DELAY_MS}
     ports:
       - '3000:3000'
     healthcheck:
