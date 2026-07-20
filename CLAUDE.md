@@ -54,8 +54,9 @@ The primary deployment target is a single Docker container configured at **runti
 
 `.github/workflows/ci.yml` on push/PR to master: `pnpm lint`, `pnpm format:check`, `pnpm typecheck`,
 `pnpm test:coverage` (Vitest + v8 coverage — **an enforced coverage floor fails CI on regression**; see Testing),
-`pnpm build`, a Playwright E2E smoke test (`e2e` job), `pnpm audit --audit-level high` (high/critical CVEs fail CI),
-and gitleaks secret scanning over full git history (any committed secret fails CI).
+`pnpm build`, the Playwright E2E scenarios (`e2e` job runs `pnpm test:e2e`; see Testing),
+`pnpm audit --audit-level high` (high/critical CVEs fail CI), and gitleaks secret scanning over full git
+history (any committed secret fails CI).
 CodeQL (`codeql.yml`) scans JS/TS + Actions. Dependabot opens weekly bump PRs (npm, docker, github-actions).
 Published releases trigger `docker-publish.yml`, pushing `yiddy/simple-countdown:<semver>` and `:latest`.
 
@@ -73,6 +74,23 @@ Published releases trigger `docker-publish.yml`, pushing `yiddy/simple-countdown
 - Component tests use Testing Library + jsdom (`test.environment: 'jsdom'` in `vite.config.ts`;
   jest-dom matchers loaded via `src/test/setup.ts`).
 - `describe()` in `src/service/date.ts` must keep key insertion order day → hour → minute → second; `Home` renders blocks from `Object.entries` order.
+
+### Playwright E2E (`tests/*.spec.ts`)
+
+- E2E is the **only** layer that exercises the built app end-to-end — the `variables.sh` → `window.*`
+  runtime-config path that unit/component tests mock away. Each scenario is a **separate build** because
+  `TIMER_*` config is baked into `variables-final.js` at build time.
+- Architecture: `tests/scenarios.ts` is the single source of truth (name, port, `outDir`, `TIMER_*` env);
+  `tests/build-e2e.ts` (run before Playwright by `pnpm test:e2e`) builds each variant into `build-e2e/<name>`;
+  `playwright.config.ts` serves each on its own port; each `tests/<name>.spec.ts` targets its scenario via
+  `test.use({ baseURL })`. Chromium-only. (Builds run before Playwright, not in a setup hook, because the web
+  servers start before any hook.)
+- **Any change to the runtime-config surface ships with an E2E scenario in the same PR** — new/changed
+  `TIMER_*` vars, `window.*` globals, `variables.sh` substitution, or target/completion behavior. Adding a
+  scenario = add an entry to `tests/scenarios.ts` + a `tests/<name>.spec.ts`; the build variant and preview
+  server follow automatically. (Same "tests ship with the change" rule as unit tests, applied to the built app.)
+- Run locally with `pnpm test:e2e` (it builds the variants, then Playwright serves them). In a sandbox
+  with a pre-installed Chromium, set `PLAYWRIGHT_CHROMIUM_EXECUTABLE` to reuse it instead of downloading one.
 
 ## Docker
 
