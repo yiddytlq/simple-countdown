@@ -21,6 +21,7 @@ const LABEL_PATTERN = /^(days?|hours?|minutes?|seconds?)$/;
 
 interface HomeGlobals {
   target: Date;
+  targetRaw?: string;
   title?: string;
   background?: string;
   doneMessage?: string;
@@ -37,6 +38,7 @@ interface HomeGlobals {
 // Defaults mirror public/variables.js with no TIMER_* env vars set.
 async function renderHome({
   target,
+  targetRaw = '',
   title = '',
   background = 'background.jpg',
   doneMessage = '',
@@ -48,6 +50,7 @@ async function renderHome({
   doneDelayMs = 3000,
 }: HomeGlobals) {
   window.target = target;
+  window.targetRaw = targetRaw;
   window.title = title;
   window.background = background;
   window.doneMessage = doneMessage;

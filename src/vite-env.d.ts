@@ -4,6 +4,7 @@
 declare interface Window {
   background: string;
   target: Date;
+  targetRaw: string;
   title: string;
   doneMessage: string;
   doneCountup: boolean;
