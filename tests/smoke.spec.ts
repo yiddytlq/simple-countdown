@@ -6,6 +6,10 @@ test.describe('countdown smoke (valid target)', () => {
   test('renders configured countdown and ticks', async ({ page }) => {
     await page.goto('/');
 
+    // TIMER_BACKGROUND is unset for this build — confirms the gradient fallback
+    // (#148 item 1.5) coexists with a working countdown.
+    await expect(page.locator('div.bg-cover').first()).toHaveClass(/bg-gradient-to-br/);
+
     // The runtime-configured title (from TIMER_TITLE via variables.sh) must reach
     // both the document title and the on-screen heading.
     const configuredTitle = await page.evaluate(() => window.title);

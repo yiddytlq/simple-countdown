@@ -59,6 +59,18 @@ export const scenarios: Scenario[] = [
     },
   },
   {
+    name: 'background',
+    port: 4178,
+    outDir: 'build-e2e/background',
+    env: {
+      // A path that 404s on the preview server — the broken/wrong-domain case
+      // (issue #148 item 1.5), as opposed to TIMER_BACKGROUND being unset.
+      TIMER_BACKGROUND: '/nonexistent-background.jpg',
+      TIMER_TARGET: FUTURE_TARGET,
+      TIMER_TITLE: TITLE,
+    },
+  },
+  {
     name: 'redirect',
     port: 4177,
     outDir: 'build-e2e/redirect',
