@@ -23,7 +23,42 @@ jobs:
       - run: pnpm lint
       - run: pnpm format:check
       - run: pnpm typecheck
-      - run: pnpm test
+      - name: Run tests with coverage
+        run: pnpm test:coverage
+      - name: Coverage summary
+        if: always()
+        run: |
+          node --input-type=module <<'EOF'
+          import { readFileSync, appendFileSync } from 'node:fs';
+          const out = process.env.GITHUB_STEP_SUMMARY;
+          const TARGET = 60; // soft line-coverage target; not a hard gate — ratchet later
+          let data;
+          try {
+            data = JSON.parse(readFileSync('coverage/coverage-summary.json', 'utf8'));
+          } catch (err) {
+            if (out) appendFileSync(out, `### Test coverage\n\nNo coverage summary found (${err.message}).\n`);
+            process.exit(0);
+          }
+          const t = data.total;
+          const row = (label, m) => `| ${label} | ${m.pct}% | ${m.covered}/${m.total} |`;
+          const table = [
+            '### Test coverage',
+            '',
+            '| Metric | % | Covered/Total |',
+            '| --- | --- | --- |',
+            row('Lines', t.lines),
+            row('Statements', t.statements),
+            row('Functions', t.functions),
+            row('Branches', t.branches),
+            '',
+            `_Soft target: ${TARGET}% lines — reported, not enforced (ratchet later)._`,
+            '',
+          ].join('\n');
+          if (out) appendFileSync(out, table);
+          if (t.lines.pct < TARGET) {
+            console.log(`::warning::Line coverage ${t.lines.pct}% is below the soft target of ${TARGET}%.`);
+          }
+          EOF
       - run: pnpm build
         env:
           TIMER_BACKGROUND: ''
