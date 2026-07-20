@@ -74,13 +74,10 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm build
-        env:
-          TIMER_BACKGROUND: ''
-          TIMER_TARGET: '2030-01-01T00:00:00Z'
-          TIMER_TITLE: 'Smoke Test'
-      - name: Run Playwright smoke test
-        run: pnpm exec playwright test
+      # test:e2e builds every scenario variant (build-e2e/*) from its own TIMER_*
+      # config, then runs the Playwright suite against the served builds.
+      - name: Run Playwright E2E scenarios
+        run: pnpm test:e2e
 
   secrets:
     runs-on: ubuntu-latest

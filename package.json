@@ -19,7 +19,8 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
-    "test:e2e": "playwright test",
+    "build:e2e": "node tests/build-e2e.ts",
+    "test:e2e": "pnpm build:e2e && playwright test",
     "export-issues": "node scripts/export-issues.js"
   },
   "dependencies": {

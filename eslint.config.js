@@ -8,7 +8,7 @@ import globals from 'globals';
 
 export default tseslint.config(
   {
-    ignores: ['build/', 'node_modules/', 'public/variables-final.js', 'coverage/'],
+    ignores: ['build/', 'build-e2e/', 'node_modules/', 'public/variables-final.js', 'coverage/'],
   },
   js.configs.recommended,
   ...tseslint.configs.strictTypeChecked,
