@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { resolveBackground } from '../service/background';
 
 interface Props {
   children: ReactNode;
@@ -26,9 +27,9 @@ class ErrorBoundary extends Component<Props, State> {
       return this.props.children;
     }
 
-    const background = window.background;
-    const hasBackground = background && background.length > 0 && background !== '__BACKGROUND__';
-    const style = hasBackground ? { backgroundImage: `url('${background}')` } : undefined;
+    const backgroundUrl = resolveBackground(window.background);
+    const style =
+      backgroundUrl !== null ? { backgroundImage: `url('${backgroundUrl}')` } : undefined;
 
     return (
       <div

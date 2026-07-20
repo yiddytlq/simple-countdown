@@ -10,6 +10,16 @@ const navigationMock = vi.hoisted(() => ({
 }));
 vi.mock('../../../service/navigation', () => navigationMock);
 
+// preloadImage is mocked so background-load-failure can be simulated on demand;
+// resolveBackground keeps its real behavior since other tests rely on it.
+const backgroundMock = vi.hoisted(() => ({
+  preloadImage: vi.fn(),
+}));
+vi.mock('../../../service/background', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../service/background')>();
+  return { ...actual, preloadImage: backgroundMock.preloadImage };
+});
+
 const base = new Date('2030-01-01T00:00:00.000Z');
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -94,8 +104,17 @@ function tick(ms: number) {
   });
 }
 
+function rootDiv(container: HTMLElement): HTMLDivElement {
+  const root = container.querySelector('div');
+  if (root === null) {
+    throw new Error('No root div found');
+  }
+  return root;
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
+  backgroundMock.preloadImage.mockResolvedValue(true);
   vi.useFakeTimers();
   vi.setSystemTime(base);
 });
@@ -351,5 +370,48 @@ describe('Home', () => {
     const message = screen.getByText(DEFAULT_DONE_MESSAGE);
     expect(message).toHaveAttribute('aria-live', 'polite');
     expect(message).toHaveAttribute('aria-atomic', 'true');
+  });
+
+  it('applies the background image inline and omits the gradient fallback for a valid URL', async () => {
+    const { container } = await renderHome({ target: new Date(base.getTime() + DAY) });
+
+    const root = rootDiv(container);
+    expect(root.style.backgroundImage).toContain('background.jpg');
+    expect(root).not.toHaveClass('bg-gradient-to-br');
+  });
+
+  it('falls back to the gradient with no inline background style for an empty background', async () => {
+    const { container } = await renderHome({
+      target: new Date(base.getTime() + DAY),
+      background: '',
+    });
+
+    const root = rootDiv(container);
+    expect(root.style.backgroundImage).toBe('');
+    expect(root).toHaveClass('bg-gradient-to-br');
+  });
+
+  it("falls back to the gradient for the raw '__BACKGROUND__' placeholder", async () => {
+    const { container } = await renderHome({
+      target: new Date(base.getTime() + DAY),
+      background: '__BACKGROUND__',
+    });
+
+    const root = rootDiv(container);
+    expect(root.style.backgroundImage).toBe('');
+    expect(root).toHaveClass('bg-gradient-to-br');
+  });
+
+  it('falls back to the gradient when the background image fails to load', async () => {
+    backgroundMock.preloadImage.mockResolvedValue(false);
+
+    const { container } = await renderHome({ target: new Date(base.getTime() + DAY) });
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    const root = rootDiv(container);
+    expect(root.style.backgroundImage).toBe('');
+    expect(root).toHaveClass('bg-gradient-to-br');
   });
 });
