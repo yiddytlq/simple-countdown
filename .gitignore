@@ -13,6 +13,8 @@
 
 # production
 /build
+# per-scenario E2E builds (see tests/scenarios.ts)
+/build-e2e
 
 # misc
 .DS_Store

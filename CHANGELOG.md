@@ -1,3 +1,10 @@
+## [1.5.1](https://github.com/yiddytlq/simple-countdown/compare/v1.5.0...v1.5.1) (2026-07-20)
+
+
+### Bug Fixes
+
+* pass untrusted event data via env: in slack-notify workflow ([#162](https://github.com/yiddytlq/simple-countdown/issues/162)) ([9c282d4](https://github.com/yiddytlq/simple-countdown/commit/9c282d49ebaaca1d39e9640a0889c0da41912ced)), closes [#158](https://github.com/yiddytlq/simple-countdown/issues/158) [#160](https://github.com/yiddytlq/simple-countdown/issues/160)
+
 # [1.5.0](https://github.com/yiddytlq/simple-countdown/compare/v1.4.0...v1.5.0) (2026-07-20)
 
 
