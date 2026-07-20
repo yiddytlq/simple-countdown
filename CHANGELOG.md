@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/yiddytlq/simple-countdown/compare/v1.3.0...v1.4.0) (2026-07-20)
+
+
+### Features
+
+* add error boundary fallback for render errors ([#155](https://github.com/yiddytlq/simple-countdown/issues/155)) ([ed2f5d9](https://github.com/yiddytlq/simple-countdown/commit/ed2f5d93f6a1a5c26fb2e4671aa551bb24fcb9e8))
+
 # [1.3.0](https://github.com/yiddytlq/simple-countdown/compare/v1.2.0...v1.3.0) (2026-07-19)
 
 
