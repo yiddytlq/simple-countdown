@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/yiddytlq/simple-countdown/compare/v1.6.0...v1.6.1) (2026-07-20)
+
+
+### Bug Fixes
+
+* fall back to gradient background when TIMER_BACKGROUND is unset or broken ([#164](https://github.com/yiddytlq/simple-countdown/issues/164)) ([4db236c](https://github.com/yiddytlq/simple-countdown/commit/4db236c730a2259d44c675f239eea01b8774e602))
+
 # [1.6.0](https://github.com/yiddytlq/simple-countdown/compare/v1.5.1...v1.6.0) (2026-07-20)
 
 
