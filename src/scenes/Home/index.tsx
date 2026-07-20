@@ -1,11 +1,12 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { describe, formatRemaining } from '../../service/date';
-import { resolveTarget } from '../../service/target';
+import { resolveTarget, warnIfAmbiguousTimezone } from '../../service/target';
 import { resolveCompletion } from '../../service/completion';
 import { redirectTo, reloadPage } from '../../service/navigation';
 import Block from './Block';
 
 const end = resolveTarget(window.target);
+warnIfAmbiguousTimezone(window.targetRaw, end);
 const completion = resolveCompletion({
   countup: window.doneCountup,
   message: window.doneMessage,

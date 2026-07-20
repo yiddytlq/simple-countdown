@@ -15,7 +15,7 @@ If you use docker, just edit the `docker-compose.yml` file so that it fits your 
 | Variables               | Definition                                                                                                             | Example                                              |
 | ----------------------- | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
 | TIMER_BACKGROUND        | The url of an image that will be used for as background                                                                | https://wallpaperplay.com/walls/full/0/7/6/29912.jpg |
-| TIMER_TARGET            | The target date of the countdown                                                                                       | Fri Oct 01 2021 15:33:36 GMT+0200                    |
+| TIMER_TARGET            | The target date of the countdown — use an explicit UTC offset (see below)                                              | Fri Oct 01 2021 15:33:36 GMT+0200                    |
 | TIMER_TITLE             | The title of the countdown, can be empty                                                                               | My title!                                            |
 | TIMER_DONE_MESSAGE      | Text shown when the countdown reaches zero (default `The wait is over!`)                                               | Happy new year!                                      |
 | TIMER_DONE_COUNTUP      | `true`/`false` (default `false`) — keep counting up past zero instead of freezing; all other TIMER_DONE_\* are ignored | true                                                 |
@@ -39,6 +39,26 @@ flags are independent and combinable (e.g. message + animation + delayed redirec
 3. If both `TIMER_DONE_RELOAD` and a valid `TIMER_DONE_REDIRECT_URL` are set, the redirect wins;
    the reload only fires when the redirect URL is unset or invalid.
 4. If neither reload nor redirect is set, the done state stays visible indefinitely.
+
+### Timezone handling for TIMER_TARGET
+
+`TIMER_TARGET` is parsed with JavaScript's `Date` constructor, which follows the ISO 8601 rule:
+
+- A **bare date** like `2026-12-31` (no time component) always parses as UTC — unambiguous
+  regardless of who's viewing it.
+- A **datetime with a time component and no UTC offset**, like `2026-12-31T20:00:00`, parses in
+  **each viewer's local timezone**. Since `TIMER_TARGET` is a single deployment-wide value, this
+  means viewers in different timezones see different remaining time for the same countdown.
+
+To get the same countdown for everyone, always include an explicit offset or `Z`:
+
+```
+TIMER_TARGET="2026-12-31T20:00:00+02:00"   # explicit offset
+TIMER_TARGET="2026-12-31T20:00:00Z"        # UTC
+```
+
+If `TIMER_TARGET` has a time component but no offset, the app logs a `console.warn` in the
+browser's developer console (not the container's stdout/stderr) recommending one.
 
 ### Example of `docker-compose.yml` file
 

@@ -1,5 +1,6 @@
 window.background = '__BACKGROUND__';
 window.target = new Date('__END__');
+window.targetRaw = '__END__';
 window.title = '__TITLE__' || '';
 window.doneMessage = '__DONE_MESSAGE__' || '';
 window.doneCountup = '__DONE_COUNTUP__' === 'true';
