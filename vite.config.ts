@@ -19,9 +19,16 @@ export default defineConfig({
       reportsDirectory: './coverage',
       include: ['src/**/*.{ts,tsx}'],
       exclude: ['src/**/__tests__/**', 'src/test/**', 'src/**/*.d.ts', 'src/index.tsx'],
-      // Soft target: 60% line coverage. Intentionally NOT enforced here — Vitest thresholds are a
-      // hard gate with no warn-only mode, so CI emits a non-failing warning instead (see ci.yml).
-      // Ratchet up later by adding `thresholds: { lines: N }` once coverage is comfortably above it.
+      // Enforced coverage floor: `pnpm test:coverage` (and therefore CI) fails if coverage drops
+      // below these. Set below the current baseline (lines/statements ~97%, functions/branches ~90-96%)
+      // with headroom so a normal PR that ships its own tests won't trip it, while a real regression
+      // will. Ratchet these numbers UP over time as coverage climbs — never down to make a red CI pass.
+      thresholds: {
+        lines: 90,
+        statements: 90,
+        functions: 85,
+        branches: 85,
+      },
     },
   },
 });
