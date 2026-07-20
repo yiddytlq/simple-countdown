@@ -6,126 +6,83 @@
 
 Simple countdown is an easy to setup countdown page. Can be setup as a countdown or as a timer.
 
-# Setup
+## Setup
 
-## Using docker (Recommended)
-
-If you use docker, just edit the `docker-compose.yml` file so that it fits your needs.
-
-| Variables               | Definition                                                                                                             | Example                                              |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| TIMER_BACKGROUND        | The url of an image that will be used for as background                                                                | https://wallpaperplay.com/walls/full/0/7/6/29912.jpg |
-| TIMER_TARGET            | The target date of the countdown — use an explicit UTC offset (see below)                                              | Fri Oct 01 2021 15:33:36 GMT+0200                    |
-| TIMER_TITLE             | The title of the countdown, can be empty                                                                               | My title!                                            |
-| TIMER_DONE_MESSAGE      | Text shown when the countdown reaches zero (default `The wait is over!`)                                               | Happy new year!                                      |
-| TIMER_DONE_COUNTUP      | `true`/`false` (default `false`) — keep counting up past zero instead of freezing; all other TIMER_DONE_\* are ignored | true                                                 |
-| TIMER_DONE_ANIMATION    | `true`/`false` (default `false`) — play a pulse animation on the completion message (skipped for reduced motion users) | true                                                 |
-| TIMER_DONE_HIDE_TIMER   | `true`/`false` (default `false`) — hide the frozen `00 00 00 00` blocks at zero and show only the message              | true                                                 |
-| TIMER_DONE_RELOAD       | `true`/`false` (default `false`) — reload the page after the done state has been visible for TIMER_DONE_DELAY_MS       | true                                                 |
-| TIMER_DONE_REDIRECT_URL | http(s) URL to navigate to after the done state has been visible for TIMER_DONE_DELAY_MS; ignored if invalid           | https://example.com/live                             |
-| TIMER_DONE_DELAY_MS     | How long (ms, default `3000`) the done state stays visible before TIMER_DONE_RELOAD / TIMER_DONE_REDIRECT_URL fires    | 5000                                                 |
-
-Variables are injected at **container start**, so one prebuilt image can be configured per deployment.
-
-### When the countdown reaches zero
-
-By default the timer freezes at `00 00 00 00` and shows `TIMER_DONE_MESSAGE`. The `TIMER_DONE_*`
-flags are independent and combinable (e.g. message + animation + delayed redirect), with these rules:
-
-1. `TIMER_DONE_COUNTUP=true` — the timer just keeps counting up past zero (the historical behavior);
-   every other `TIMER_DONE_*` variable is ignored.
-2. Otherwise the timer freezes the instant the target passes and the message is shown
-   (`TIMER_DONE_ANIMATION` animates it, `TIMER_DONE_HIDE_TIMER` hides the frozen blocks).
-3. If both `TIMER_DONE_RELOAD` and a valid `TIMER_DONE_REDIRECT_URL` are set, the redirect wins;
-   the reload only fires when the redirect URL is unset or invalid.
-4. If neither reload nor redirect is set, the done state stays visible indefinitely.
-
-### Timezone handling for TIMER_TARGET
-
-`TIMER_TARGET` is parsed with JavaScript's `Date` constructor, which follows the ISO 8601 rule:
-
-- A **bare date** like `2026-12-31` (no time component) always parses as UTC — unambiguous
-  regardless of who's viewing it.
-- A **datetime with a time component and no UTC offset**, like `2026-12-31T20:00:00`, parses in
-  **each viewer's local timezone**. Since `TIMER_TARGET` is a single deployment-wide value, this
-  means viewers in different timezones see different remaining time for the same countdown.
-
-To get the same countdown for everyone, always include an explicit offset or `Z`:
-
-```
-TIMER_TARGET="2026-12-31T20:00:00+02:00"   # explicit offset
-TIMER_TARGET="2026-12-31T20:00:00Z"        # UTC
-```
-
-If `TIMER_TARGET` has a time component but no offset, the app logs a `console.warn` in the
-browser's developer console (not the container's stdout/stderr) recommending one.
-
-### Example of `docker-compose.yml` file
-
-```yml
-services:
-  web:
-    image: yiddy/simple-countdown
-    environment:
-      TIMER_BACKGROUND: https://wallpaperplay.com/walls/full/0/7/6/29912.jpg
-      TIMER_TARGET: 'Fri Oct 01 2021 15:33:36 GMT+0200' # Get help with https://esqsoft.com/javascript_examples/date-to-epoch.htm
-      TIMER_TITLE: 'My next birthday' # Can be empty
-    ports:
-      - '3000:3000'
-```
-
-Release images are tagged with their semantic version (e.g. `yiddy/simple-countdown:1.2.3`) as well as `latest`.
-
-### Logs
-
-Everything the container does is logged to stdout/stderr, so the standard Docker commands show it:
+Copy `.env.example` to `.env` and fill in your values:
 
 ```sh
-docker logs <container>       # or: docker compose logs -f web
+cp .env.example .env
 ```
 
-What you'll see:
+| Variables               | Definition                                                                                                            | Example                                              |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| TIMER_BACKGROUND        | The url of an image that will be used for as background                                                               | https://wallpaperplay.com/walls/full/0/7/6/29912.jpg |
+| TIMER_TARGET            | The target date of the countdown — always include an explicit UTC offset (e.g. `Z` or `+02:00`)                       | 2026-12-31T23:59:59Z                                 |
+| TIMER_TITLE             | The title of the countdown, can be empty                                                                              | My next birthday                                     |
+| TIMER_DONE_MESSAGE      | Text shown when the countdown reaches zero (default `The wait is over!`)                                              | Happy new year!                                      |
+| TIMER_DONE_COUNTUP      | `true`/`false` (default `false`) — keep counting up past zero instead of freezing; overrides all other `TIMER_DONE_*` | true                                                 |
+| TIMER_DONE_ANIMATION    | `true`/`false` (default `false`) — pulse animation on the completion message (skipped for reduced motion users)       | true                                                 |
+| TIMER_DONE_HIDE_TIMER   | `true`/`false` (default `false`) — hide the frozen `00 00 00 00` blocks at zero and show only the message             | true                                                 |
+| TIMER_DONE_RELOAD       | `true`/`false` (default `false`) — reload the page after the done state, per `TIMER_DONE_DELAY_MS`                    | true                                                 |
+| TIMER_DONE_REDIRECT_URL | http(s) URL to navigate to after the done state; takes priority over `TIMER_DONE_RELOAD` when both are set            | https://example.com/live                             |
+| TIMER_DONE_DELAY_MS     | How long (ms, default `3000`) the done state stays visible before reload/redirect fires                               | 5000                                                 |
 
-- **Startup configuration summary** — the entrypoint confirms the runtime variables were injected
-  and reports, for each `TIMER_*` variable, whether it was set (values themselves are not logged).
-- **nginx access and error logs** — the image forwards them to stdout/stderr.
-- **Failures** — if variable injection fails, the reason is logged before the container exits.
+Don't quote values in `.env` — omitting the UTC offset on `TIMER_TARGET` means each viewer sees a
+different remaining time, since it's then parsed in their local timezone.
 
-The image also ships a `HEALTHCHECK` that fetches `http://127.0.0.1:3000/`; inspect its status with:
+## Usage
 
 ```sh
-docker inspect --format '{{json .State.Health}}' <container>
-```
-
-## Without docker
-
-> This method builds the project with the env variables you provide, producing a `build` folder that has to be served manually afterwards.
-
-This project uses [pnpm](https://pnpm.io) exclusively — do not use npm or yarn.
-
-```sh
+. ./load-env.sh
 pnpm install
-TIMER_TARGET="Fri Oct 01 2021 15:33:36 GMT+0200" TIMER_TITLE="example" pnpm build
+pnpm build
 pnpm dlx serve -s -l tcp://0.0.0.0:3000 build/
 ```
 
-> Variables are taken from the env and are the same as the table above.
+## Using docker
 
-# Development
+The published image (`yiddy/simple-countdown`, built on `nginx:alpine-slim`, ~21 MB — no Node.js
+or `node_modules` in the runtime container) reads the same `.env`:
 
 ```sh
-pnpm install        # install dependencies (pnpm only)
-pnpm dev            # start the Vite dev server on :3000
-pnpm test           # run unit tests (Vitest)
-pnpm lint           # ESLint (strict TypeScript, no `any`)
-pnpm format:check   # Prettier check
-pnpm typecheck      # tsc --noEmit
+docker run -d --env-file .env -p 3000:3000 yiddy/simple-countdown
 ```
 
-CI enforces all of the above plus a dependency audit (fails on high/critical CVEs), secret scanning
-(gitleaks), and CodeQL. Versioning is automated with semantic-release from conventional commit
-messages (`feat:` → minor, `fix:` → patch, `BREAKING CHANGE` → major) — never bump the version by hand.
-See `CLAUDE.md` for the full contributor conventions.
+## Using docker compose
+
+`docker-compose.yml` maps every variable from `.env` (Compose auto-loads it for `${VAR}`
+substitution):
+
+```yaml
+environment:
+  TIMER_BACKGROUND: ${TIMER_BACKGROUND}
+  TIMER_TARGET: ${TIMER_TARGET}
+  TIMER_TITLE: ${TIMER_TITLE}
+  TIMER_DONE_MESSAGE: ${TIMER_DONE_MESSAGE}
+  TIMER_DONE_COUNTUP: ${TIMER_DONE_COUNTUP}
+  TIMER_DONE_ANIMATION: ${TIMER_DONE_ANIMATION}
+  TIMER_DONE_HIDE_TIMER: ${TIMER_DONE_HIDE_TIMER}
+  TIMER_DONE_RELOAD: ${TIMER_DONE_RELOAD}
+  TIMER_DONE_REDIRECT_URL: ${TIMER_DONE_REDIRECT_URL}
+  TIMER_DONE_DELAY_MS: ${TIMER_DONE_DELAY_MS}
+```
+
+```sh
+docker compose up
+```
+
+For production — pulling the published image and loading `.env` straight via `env_file:`:
+
+```sh
+docker compose -f docker-compose.production.yml up
+```
+
+Release images are tagged with their semantic version (e.g. `yiddy/simple-countdown:1.2.3`) as
+well as `latest`.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for logs and local development.
 
 ## Credits
 
