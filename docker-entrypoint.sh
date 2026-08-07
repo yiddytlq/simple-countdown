@@ -10,12 +10,22 @@ set -e
 : "${CONF:=/etc/nginx/conf.d/default.conf}"
 : "${VARIABLES_SH:=/usr/local/bin/variables.sh}"
 
-# debug | info | error (default info). Anything else falls back to info.
-LOG_LEVEL_RAW="${LOG_LEVEL:-info}"
+# LOG_LEVEL governs how much *request* traffic is logged. It deliberately does
+# not gate startup, shutdown or failures: those are what someone reads when
+# something has gone wrong, they cost a few lines per container start, and the
+# outage that prompted this was diagnosed from exactly such a line.
+#
+#   error (default)  failed requests only (non-2xx/3xx)
+#   info             every request
+#   debug            every request, plus the generated config
+#
+# Default is error because this serves one static page: a successful GET is the
+# uptime monitor doing its job, which nobody reads and which writes ~4 MB/day to
+# the disk at one probe every five seconds.
+LOG_LEVEL_RAW="${LOG_LEVEL:-error}"
 case "$LOG_LEVEL_RAW" in
     debug) LOG_THRESHOLD=0 ;;
-    info) LOG_THRESHOLD=1 ;;
-    error) LOG_THRESHOLD=3 ;;
+    info | error) LOG_THRESHOLD=1 ;;
     *) LOG_THRESHOLD=1 ;;
 esac
 
@@ -34,7 +44,7 @@ log() {
 log info "simple-countdown container starting (log level ${LOG_LEVEL_RAW})"
 case "$LOG_LEVEL_RAW" in
     debug | info | error) ;;
-    *) log warn "unknown LOG_LEVEL '${LOG_LEVEL_RAW}', using info" ;;
+    *) log warn "unknown LOG_LEVEL '${LOG_LEVEL_RAW}', using error" ;;
 esac
 
 # Inject TIMER_* env vars into variables-final.js at container start,
@@ -75,16 +85,19 @@ for var in $(env | sed -n 's/^\(TIMER_[A-Z0-9_]*\)=.*/\1/p'); do
     esac
 done
 
-# Quieter levels drop per-request logging entirely: that write volume is a real
-# cost on an SD card, and it is pure noise once the service is healthy.
-if [ "$LOG_LEVEL_RAW" = "error" ]; then
-    ACCESS_LOG="off"
-    ERROR_LOG_LEVEL="error"
-elif [ "$LOG_LEVEL_RAW" = "debug" ]; then
+# error keeps the access log, but only for requests that failed -- a 404 on a
+# background image still has to be visible. $status_failed is the map defined in
+# the template. error_log stays at notice even here: dropping to the error tier
+# would hide "signal N received, shutting down", which is the single most useful
+# line this container ever emits.
+if [ "$LOG_LEVEL_RAW" = "debug" ]; then
     ACCESS_LOG="/dev/stdout main"
     ERROR_LOG_LEVEL="info"
-else
+elif [ "$LOG_LEVEL_RAW" = "info" ]; then
     ACCESS_LOG="/dev/stdout main"
+    ERROR_LOG_LEVEL="notice"
+else
+    ACCESS_LOG="/dev/stdout main if=\$status_failed"
     ERROR_LOG_LEVEL="notice"
 fi
 
