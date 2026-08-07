@@ -1,3 +1,10 @@
+## [1.6.2](https://github.com/yiddytlq/simple-countdown/compare/v1.6.1...v1.6.2) (2026-08-07)
+
+
+### Bug Fixes
+
+* substitute TIMER_* values literally and stop probes burying the log ([#166](https://github.com/yiddytlq/simple-countdown/issues/166)) ([9d17b12](https://github.com/yiddytlq/simple-countdown/commit/9d17b12019b0a2d8f7716c141f814a6210746252))
+
 ## [1.6.1](https://github.com/yiddytlq/simple-countdown/compare/v1.6.0...v1.6.1) (2026-07-20)
 
 
