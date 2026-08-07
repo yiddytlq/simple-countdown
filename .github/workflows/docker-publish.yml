@@ -43,11 +43,9 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      - name: Update Docker Hub description
-        uses: peter-evans/dockerhub-description@1b9a80c056b620d92cedb9d9b5a223409c68ddfa # v5.0.0
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-          repository: yiddy/simple-countdown
-          short-description: 'Self-hostable countdown timer. nginx-based (~21MB), configured via TIMER_* env vars at runtime.'
-          readme-filepath: ./README.md
+      # The Docker Hub description sync (peter-evans/dockerhub-description) was
+      # removed after it failed 403 on its first run in v1.6.2. That API needs a
+      # token with read/write/delete scope; DOCKER_TOKEN is read/write, which is
+      # all the push needs. Granting delete to CI — letting it drop tags and
+      # repositories — is not worth keeping a description string in sync, so the
+      # Docker Hub description is now edited by hand in the Docker Hub UI.
