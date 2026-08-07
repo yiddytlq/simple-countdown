@@ -1,13 +1,21 @@
 services:
   web:
-    stdin_open: true # So that the serving is not exited with code 0
+    # Without this the container does not come back after a host reboot or a
+    # Docker daemon restart: the daemon only restores containers that have a
+    # restart policy.
+    restart: unless-stopped
     image: yiddy/simple-countdown
     env_file: .env
     ports:
       - '3000:3000'
     healthcheck:
-      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3000/ >/dev/null || exit 1']
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3000/healthz >/dev/null || exit 1']
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 5s
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '5'

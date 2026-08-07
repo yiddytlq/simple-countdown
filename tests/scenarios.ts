@@ -71,6 +71,23 @@ export const scenarios: Scenario[] = [
     },
   },
   {
+    // Every character that broke the old sed-based substitution, in one build:
+    // @ was the sed delimiter (exited non-zero, so the container never started),
+    // & was a backreference, and an apostrophe closed the JS string literal and
+    // blanked the page. Only a real build proves the value survives variables.sh
+    // and reaches the browser intact.
+    name: 'metacharacters',
+    port: 4179,
+    outDir: 'build-e2e/metacharacters',
+    env: {
+      TIMER_BACKGROUND: '',
+      TIMER_TARGET: FUTURE_TARGET,
+      TIMER_TITLE: "Chesky & Ruchy's wedding @ 6pm",
+      TIMER_DONE_MESSAGE: "It's done @ last!",
+      TIMER_DONE_REDIRECT_URL: 'http://user@localhost:4173/',
+    },
+  },
+  {
     name: 'redirect',
     port: 4177,
     outDir: 'build-e2e/redirect',
