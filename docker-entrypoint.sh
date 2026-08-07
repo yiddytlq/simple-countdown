@@ -1,17 +1,52 @@
 #!/bin/sh
+# Container start: inject TIMER_* env into variables-final.js, render the nginx
+# config for the requested LOG_LEVEL, verify both, then hand off to nginx.
 set -e
 
-echo "[entrypoint] simple-countdown container starting"
+# Overridable so this can be exercised outside a container; the defaults are the
+# only values ever used in the image.
+: "${HTML_DIR:=/usr/share/nginx/html}"
+: "${TEMPLATE:=/etc/nginx/templates/default.conf.template}"
+: "${CONF:=/etc/nginx/conf.d/default.conf}"
+: "${VARIABLES_SH:=/usr/local/bin/variables.sh}"
+
+# debug | info | error (default info). Anything else falls back to info.
+LOG_LEVEL_RAW="${LOG_LEVEL:-info}"
+case "$LOG_LEVEL_RAW" in
+    debug) LOG_THRESHOLD=0 ;;
+    info) LOG_THRESHOLD=1 ;;
+    error) LOG_THRESHOLD=3 ;;
+    *) LOG_THRESHOLD=1 ;;
+esac
+
+log() {
+    case "$1" in
+        debug) lvl=0 ;;
+        info) lvl=1 ;;
+        warn) lvl=2 ;;
+        *) lvl=3 ;;
+    esac
+    [ "$lvl" -ge "$LOG_THRESHOLD" ] || return 0
+    shift
+    echo "[entrypoint] $*" >&2
+}
+
+log info "simple-countdown container starting (log level ${LOG_LEVEL_RAW})"
+case "$LOG_LEVEL_RAW" in
+    debug | info | error) ;;
+    *) log warn "unknown LOG_LEVEL '${LOG_LEVEL_RAW}', using info" ;;
+esac
 
 # Inject TIMER_* env vars into variables-final.js at container start,
 # so one prebuilt image is configured per-deployment.
-if /variables.sh /usr/share/nginx/html; then
-    echo "[entrypoint] runtime configuration injected"
+if "$VARIABLES_SH" "$HTML_DIR"; then
+    log info "runtime configuration injected"
 else
     status=$?
-    echo "[entrypoint] ERROR: variables.sh failed with exit code $status" >&2
+    log error "ERROR: variables.sh failed with exit code $status"
     exit "$status"
 fi
+log debug "$(cat "$HTML_DIR/variables-final.js")"
 
 # Presence only - values may be long or sensitive
 for name in TIMER_BACKGROUND TIMER_TARGET TIMER_TITLE TIMER_DONE_MESSAGE TIMER_DONE_COUNTUP \
@@ -19,11 +54,56 @@ for name in TIMER_BACKGROUND TIMER_TARGET TIMER_TITLE TIMER_DONE_MESSAGE TIMER_D
     TIMER_DONE_DELAY_MS; do
     eval "value=\${$name:-}"
     if [ -n "$value" ]; then
-        echo "[entrypoint] $name set"
+        log info "$name set"
     else
-        echo "[entrypoint] $name not set"
+        log info "$name not set"
     fi
 done
 
-echo "[entrypoint] starting nginx"
+if [ -z "${TIMER_TARGET:-}" ]; then
+    log warn "TIMER_TARGET is not set - the page will show a configuration error"
+fi
+
+# A TIMER_* this image does not implement is otherwise ignored in silence: the
+# setting looks applied and never is.
+for var in $(env | sed -n 's/^\(TIMER_[A-Z0-9_]*\)=.*/\1/p'); do
+    case "$var" in
+        TIMER_BACKGROUND | TIMER_TARGET | TIMER_TITLE | TIMER_DONE_MESSAGE | TIMER_DONE_COUNTUP | \
+            TIMER_DONE_ANIMATION | TIMER_DONE_HIDE_TIMER | TIMER_DONE_RELOAD | \
+            TIMER_DONE_REDIRECT_URL | TIMER_DONE_DELAY_MS) ;;
+        *) log warn "ignoring $var: not implemented by this image" ;;
+    esac
+done
+
+# Quieter levels drop per-request logging entirely: that write volume is a real
+# cost on an SD card, and it is pure noise once the service is healthy.
+if [ "$LOG_LEVEL_RAW" = "error" ]; then
+    ACCESS_LOG="off"
+    ERROR_LOG_LEVEL="error"
+elif [ "$LOG_LEVEL_RAW" = "debug" ]; then
+    ACCESS_LOG="/dev/stdout main"
+    ERROR_LOG_LEVEL="info"
+else
+    ACCESS_LOG="/dev/stdout main"
+    ERROR_LOG_LEVEL="notice"
+fi
+
+sed -e "s|__ACCESS_LOG__|${ACCESS_LOG}|g" \
+    -e "s|__ERROR_LOG_LEVEL__|${ERROR_LOG_LEVEL}|g" \
+    "$TEMPLATE" >"$CONF"
+log debug "rendered $CONF (access_log ${ACCESS_LOG}, error_log ${ERROR_LOG_LEVEL})"
+
+if nginx -t 2>/dev/null; then
+    log info "nginx config test passed"
+else
+    log error "ERROR: nginx config test failed:"
+    nginx -t >&2 2>&1 || true
+    exit 1
+fi
+
+log info "starting nginx"
+
+# exec so nginx is PID 1 and receives SIGQUIT/SIGTERM directly. Wrapping it to
+# trap signals here would need hand-rolled forwarding, and nginx already logs its
+# own shutdown to error_log.
 exec nginx -g 'daemon off;'
