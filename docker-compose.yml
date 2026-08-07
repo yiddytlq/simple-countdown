@@ -18,7 +18,7 @@ services:
       TIMER_DONE_RELOAD: ${TIMER_DONE_RELOAD}
       TIMER_DONE_REDIRECT_URL: ${TIMER_DONE_REDIRECT_URL}
       TIMER_DONE_DELAY_MS: ${TIMER_DONE_DELAY_MS}
-      LOG_LEVEL: ${LOG_LEVEL:-info}
+      LOG_LEVEL: ${LOG_LEVEL:-error}
     ports:
       - '3000:3000'
     healthcheck:
