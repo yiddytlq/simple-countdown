@@ -1,3 +1,10 @@
+## [1.6.3](https://github.com/yiddytlq/simple-countdown/compare/v1.6.2...v1.6.3) (2026-08-07)
+
+
+### Bug Fixes
+
+* default log level to error and stop hiding SIGQUIT at quiet levels ([#168](https://github.com/yiddytlq/simple-countdown/issues/168)) ([924cbdd](https://github.com/yiddytlq/simple-countdown/commit/924cbdd826496189ca105cb157fe35e950ed14e2))
+
 ## [1.6.2](https://github.com/yiddytlq/simple-countdown/compare/v1.6.1...v1.6.2) (2026-08-07)
 
 
